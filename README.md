@@ -1,4 +1,4 @@
-# Control Panel
+# @digitalmeadow/control-panel
 
 GUI control panel for creative coding.
 
