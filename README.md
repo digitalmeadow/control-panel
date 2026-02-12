@@ -2,6 +2,12 @@
 
 GUI control panel for creative coding.
 
+## Features
+
+- Dependency free
+- Minimal API
+- Audio and MIDI input signals
+
 ## Controllers
 
 - Number
