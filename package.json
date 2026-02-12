@@ -1,0 +1,39 @@
+{
+  "name": "control-panel",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "GUI control panel for creative coding",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "gui",
+    "control-panel",
+    "creative-coding",
+    "controls"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalmeadow/control-panel.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/control-panel.umd.cjs",
+  "module": "./dist/control-panel.js",
+  "exports": {
+    ".": {
+      "import": "./dist/control-panel.js",
+      "require": "./dist/control-panel.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "typescript": "5.9.3",
+    "vite": "7.3.1"
+  }
+}

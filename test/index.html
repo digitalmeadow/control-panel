@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Control Panel Test</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #f0f0f0;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        padding: 20px;
+      }
+
+      #canvas {
+        width: 100%;
+        max-width: 600px;
+        height: 400px;
+        background: white;
+        display: block;
+        margin: 0 auto 10px;
+      }
+
+      #output {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="output">Waiting for value changes...</div>
+    <script type="module" src="./test.ts"></script>
+  </body>
+</html>
