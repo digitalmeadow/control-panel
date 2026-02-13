@@ -2,6 +2,7 @@ import { createElement } from "../utils/dom";
 import { formatStringCamelToSentence } from "../utils/strings";
 import { audioSignals } from "../signals/AudioSignals";
 import { midiSignals } from "../signals/MidiSignals";
+import { mathSignals } from "../signals/MathSignals";
 
 export type ChangeCallback<T> = (value: T) => void;
 
@@ -14,6 +15,7 @@ export interface ControllerOptions {
 export abstract class Controller<T> {
   static audio = audioSignals;
   static midi = midiSignals;
+  static math = mathSignals;
 
   public readonly key: string;
   public readonly initialValue: T;

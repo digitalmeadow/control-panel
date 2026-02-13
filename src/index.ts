@@ -10,3 +10,4 @@ export * from "./controllers/GradientController";
 export * from "./controllers/ArrayController";
 export * from "./signals/AudioSignals";
 export * from "./signals/MidiSignals";
+export * from "./signals/MathSignals";

@@ -197,9 +197,6 @@ const styles = `
 .cp-number-settings {
   margin-top: 4px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 4px;
-  border-radius: 4px;
   display: flex;
   flex-direction: column;
   gap: 4px;

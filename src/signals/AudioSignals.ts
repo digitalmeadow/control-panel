@@ -13,22 +13,22 @@ export class AudioSignals {
   waveformArray: Uint8Array<ArrayBuffer>;
 
   // Spectrum normalization parameters
-  smoothingTimeConstant = 0.92;
-  spectrumBoost = 2.0; // Frequency-dependent boost (1.0 = off, higher = more balanced)
+  smoothingTimeConstant = 0.82;
+  spectrumBoost = 3.0; // Frequency-dependent boost (1.0 = off, higher = more balanced)
 
   // Normalized values 0-1
   levels = {
+    volume: 0,
     bass: 0,
     mids: 0,
     highs: 0,
-    volume: 0,
   };
 
   peaks = {
+    volume: 0,
     bass: 0,
     mids: 0,
     highs: 0,
-    volume: 0,
   };
 
   private _isAnalyzing = false;
