@@ -283,6 +283,61 @@ export class ControlPanel extends ControlPanelContainer {
     this.stats = new Stats();
     this.summaryElement.appendChild(this.stats.domElement);
 
+    // Drag functionality
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let panelStartX = 0;
+    let panelStartY = 0;
+
+    this.summaryElement.addEventListener("mousedown", (e) => {
+      // Only drag if clicking on the summary itself, not the stats
+      if (e.target !== this.summaryElement && e.target !== titleSpan) return;
+
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+
+      const rect = this.domElement.getBoundingClientRect();
+      panelStartX = rect.left;
+      panelStartY = rect.top;
+
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - dragStartX;
+      const deltaY = e.clientY - dragStartY;
+
+      const newX = panelStartX + deltaX;
+      const newY = panelStartY + deltaY;
+
+      this.domElement.style.left = `${newX}px`;
+      this.domElement.style.top = `${newY}px`;
+      this.domElement.style.right = "auto";
+      this.domElement.style.bottom = "auto";
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        this.savePositionAndSize();
+      }
+    });
+
+    // Resize observer
+    const resizeObserver = new ResizeObserver(() => {
+      if (!isDragging) {
+        this.savePositionAndSize();
+      }
+    });
+    resizeObserver.observe(this.domElement);
+
+    // Restore position and size from sessionStorage
+    this.restorePositionAndSize();
+
     this.contentElement = createElement("div", { className: "cp-content" });
     this.domElement.appendChild(this.contentElement);
 
@@ -576,6 +631,40 @@ export class ControlPanel extends ControlPanelContainer {
     const defaultKey = this.presetStoragePrefix + "Default";
     this.save();
     this.saveToLocalStorage(defaultKey);
+  }
+
+  private savePositionAndSize() {
+    const rect = this.domElement.getBoundingClientRect();
+    const key = `cp-position-${this.presetStoragePrefix}`;
+    const state = {
+      left: rect.left,
+      top: rect.top,
+      width: this.domElement.offsetWidth,
+      height: this.domElement.offsetHeight,
+    };
+    try {
+      sessionStorage.setItem(key, JSON.stringify(state));
+    } catch (e) {
+      console.warn("Failed to save panel position/size", e);
+    }
+  }
+
+  private restorePositionAndSize() {
+    const key = `cp-position-${this.presetStoragePrefix}`;
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (raw) {
+        const state = JSON.parse(raw);
+        this.domElement.style.left = `${state.left}px`;
+        this.domElement.style.top = `${state.top}px`;
+        this.domElement.style.right = "auto";
+        this.domElement.style.bottom = "auto";
+        this.domElement.style.width = `${state.width}px`;
+        this.domElement.style.height = `${state.height}px`;
+      }
+    } catch (e) {
+      console.warn("Failed to restore panel position/size", e);
+    }
   }
 
   destroy() {

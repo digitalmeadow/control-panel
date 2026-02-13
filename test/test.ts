@@ -2,6 +2,7 @@ import { ControlPanel } from "../src/ControlPanel";
 import factoryPresets from "./presets.json";
 
 const state = {
+  backgroundColor: "#ffffff",
   number: 50,
   select: "Option 2",
   boolean: true,
@@ -83,6 +84,12 @@ factoryPresetsFolder.addButton("Load", () => {
   const preset = factoryPresets[presetName as keyof typeof factoryPresets];
   controlPanel.load(preset);
   factorySelect.setValue(presetName);
+});
+
+// Background (html color)
+controlPanel.addColor(state, "backgroundColor").onChange((v) => {
+  log("backgroundColor", v);
+  document.body.style.backgroundColor = v;
 });
 
 controlPanel

@@ -1,25 +1,53 @@
 const styles = `
 .cp-root {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  width: 280px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(280px, 90%);
   max-height: 90vh;
   overflow: auto;
   background: transparent;
+  resize: both;
   color: #fff;
-  mix-blend-mode: exclusion;
+  min-width: 200px;
+  min-height: 50px;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
   font-size: 10px;
   line-height: 1.2;
   padding: 8px;
-  z-index: 100;
+}
+
+/* Apply blend mode to all children except color inputs */
+.cp-root .cp-label, 
+.cp-root .cp-setting-label,
+.cp-root .cp-summary,
+.cp-root .cp-controller-summary,
+.cp-root .cp-separator,
+.cp-root .cp-value-display,
+.cp-root .cp-button,
+.cp-root .cp-input-number,
+.cp-root .cp-input-range,
+.cp-root .cp-select,
+.cp-root .cp-radio
+{
+  mix-blend-mode: difference;
+}
+
+.cp-root .cp-input-color,
+.cp-root .cp-color-swatch {
+  mix-blend-mode: normal;
+  isolation: isolate;
+}
+
+.cp-root:not([open]) .cp-summary-root {
+  opacity: 0.5;
 }
 
 .cp-root::-webkit-scrollbar {
   width: 1px;
+  height: 1px;
 }
 .cp-root::-webkit-scrollbar-track {
   background: transparent;
@@ -38,6 +66,7 @@ const styles = `
 .cp-summary-root {
   position: sticky;
   top: 0;
+  cursor: grab;
 }
 
 .cp-stats {
@@ -99,6 +128,7 @@ const styles = `
 
 .cp-select {
   width: 50%;
+  color: inherit;
   background: rgba(255, 255, 255, 0.3);
   border: none;
   padding: 2px 4px;
@@ -113,6 +143,7 @@ const styles = `
 
 .cp-button {
   width: 100%;
+  color: inherit;
   background: rgba(255, 255, 255, 0.3);
   border: none;
   padding: 4px 2px;
@@ -259,9 +290,6 @@ const styles = `
   border: none;
   background: none;
   outline: none;
-
-  isolation: isolate;
-  mix-blend-mode: normal;
   cursor: pointer;
 }
 
