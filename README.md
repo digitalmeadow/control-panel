@@ -1,6 +1,6 @@
 # @digitalmeadow/control-panel
 
-ControlPanel control panel for creative coding.
+GUI control panel for creative coding.
 
 ## Features
 
@@ -22,7 +22,7 @@ ControlPanel control panel for creative coding.
 ## Usage
 
 ```typescript
-import { ControlPanel } from "./src/controlPanel";
+import { ControlPanel } from "@digitalmeadow/control-panel";
 
 const state = { number: 50, color: "#3498db", enabled: true };
 const controlPanel = new ControlPanel();
