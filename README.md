@@ -1,6 +1,6 @@
 # @digitalmeadow/control-panel
 
-GUI control panel for creative coding.
+ControlPanel control panel for creative coding.
 
 ## Features
 
@@ -22,23 +22,23 @@ GUI control panel for creative coding.
 ## Usage
 
 ```typescript
-import { GUI } from "./src/gui";
+import { ControlPanel } from "./src/controlPanel";
 
 const state = { number: 50, color: "#3498db", enabled: true };
-const gui = new GUI();
+const controlPanel = new ControlPanel();
 
-gui.addNumber(state, "number", { min: 0, max: 100, step: 1 });
-gui.addColor(state, "color");
-gui.addBoolean(state, "enabled");
-gui.addButton("Reset", () => gui.reset());
+controlPanel.addNumber(state, "number", { min: 0, max: 100, step: 1 });
+controlPanel.addColor(state, "color");
+controlPanel.addBoolean(state, "enabled");
+controlPanel.addButton("Reset", () => controlPanel.reset());
 
-gui.saveDefaultPreset();
+controlPanel.saveDefaultPreset();
 ```
 
 ## Folders
 
 ```typescript
-const folder = gui.addFolder("Settings");
+const folder = controlPanel.addFolder("Settings");
 folder.addNumber(state, "value", { min: 0, max: 100 });
 
 const nested = folder.addFolder("Advanced");
@@ -55,20 +55,20 @@ pnpm build
 ## API
 
 ```typescript
-gui.addNumber(object, property, options?)
-gui.addSelect(object, property, options?)
-gui.addBoolean(object, property, options?)
-gui.addButton(label, fn, options?)
-gui.addRadio(object, property, options?)
-gui.addColor(object, property, options?)
-gui.addGradient(object, property, options?)
-gui.addArray(object, property, options?)
-gui.addFolder(title)
+controlPanel.addNumber(object, property, options?)
+controlPanel.addSelect(object, property, options?)
+controlPanel.addBoolean(object, property, options?)
+controlPanel.addButton(label, fn, options?)
+controlPanel.addRadio(object, property, options?)
+controlPanel.addColor(object, property, options?)
+controlPanel.addGradient(object, property, options?)
+controlPanel.addArray(object, property, options?)
+controlPanel.addFolder(title)
 
-gui.save()
-gui.load(state)
-gui.reset()
-gui.saveDefaultPreset()
+controlPanel.save()
+controlPanel.load(state)
+controlPanel.reset()
+controlPanel.saveDefaultPreset()
 ```
 
 ## Options

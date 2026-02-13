@@ -1,4 +1,4 @@
-import { GUI } from "../src/gui";
+import { ControlPanel } from "../src/ControlPanel";
 
 const state = {
   number: 50,
@@ -64,21 +64,21 @@ function draw() {
 
 draw();
 
-const gui = new GUI(undefined, { title: "Control Panel" });
+const controlPanel = new ControlPanel(undefined, { title: "Control Panel" });
 
-gui
+controlPanel
   .addNumber(state, "number", { min: 0, max: 100, step: 1 })
   .onChange((v) => log("number", v));
-gui
+controlPanel
   .addSelect(state, "select", {
     options: ["Option 1", "Option 2", "Option 3"],
   })
   .onChange((v) => log("select", v));
-gui.addBoolean(state, "boolean").onChange((v) => log("boolean", v));
-gui.addColor(state, "color").onChange((v) => log("color", v));
-gui.addButton("Reset", () => gui.reset());
+controlPanel.addBoolean(state, "boolean").onChange((v) => log("boolean", v));
+controlPanel.addColor(state, "color").onChange((v) => log("color", v));
+controlPanel.addButton("Reset", () => controlPanel.reset());
 
-const folder = gui.addFolder("Advanced");
+const folder = controlPanel.addFolder("Advanced");
 
 folder
   .addGradient(state, "gradient", {
@@ -107,7 +107,7 @@ nested
   .addRadio(state, "shape", { options: ["circle", "square"] })
   .onChange((v) => log("shape", v));
 
-const disabled = gui.addFolder("Disabled");
+const disabled = controlPanel.addFolder("Disabled");
 disabled.addNumber(state, "number", { disabled: true, min: 0, max: 100 });
 disabled.addSelect(state, "select", { disabled: true, options: ["A", "B"] });
 disabled.addBoolean(state, "boolean", { disabled: true });
@@ -118,4 +118,4 @@ disabled.addRadio(state, "shape", {
   options: ["circle", "square"],
 });
 
-gui.saveDefaultPreset();
+controlPanel.saveDefaultPreset();

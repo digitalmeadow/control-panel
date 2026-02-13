@@ -1,36 +1,12 @@
-export { GUI } from "./gui";
-export { Controller } from "./controllers/Controller";
-export {
-  NumberController,
-  type NumberControllerOptions,
-} from "./controllers/NumberController";
-export {
-  SelectController,
-  type SelectControllerOptions,
-} from "./controllers/SelectController";
-export {
-  BooleanController,
-  type BooleanControllerOptions,
-} from "./controllers/BooleanController";
-export {
-  ButtonController,
-  type ButtonControllerOptions,
-} from "./controllers/ButtonController";
-export {
-  RadioController,
-  type RadioControllerOptions,
-} from "./controllers/RadioController";
-export {
-  ColorController,
-  type ColorControllerOptions,
-} from "./controllers/ColorController";
-export {
-  GradientController,
-  type GradientControllerOptions,
-} from "./controllers/GradientController";
-export {
-  ArrayController,
-  type ArrayControllerOptions,
-} from "./controllers/ArrayController";
-export { AudioSignals, audioSignals } from "./signals/AudioSignals";
-export { MidiSignals, midiSignals } from "./signals/MidiSignals";
+export * from "./ControlPanel";
+export * from "./controllers/Controller";
+export * from "./controllers/NumberController";
+export * from "./controllers/SelectController";
+export * from "./controllers/BooleanController";
+export * from "./controllers/ButtonController";
+export * from "./controllers/RadioController";
+export * from "./controllers/ColorController";
+export * from "./controllers/GradientController";
+export * from "./controllers/ArrayController";
+export * from "./signals/AudioSignals";
+export * from "./signals/MidiSignals";

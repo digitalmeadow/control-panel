@@ -41,7 +41,6 @@ export class MidiSignals {
     const data = message.data;
     const [status] = data;
     const type = status & 0xf0;
-    // const channel = status & 0x0f;
 
     // Filter out clock/active sensing if needed
     if (type >= 0xf0) return;

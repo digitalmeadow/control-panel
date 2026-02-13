@@ -1,4 +1,5 @@
-import "./styles.css";
+import { injectStyles } from "./styles";
+
 import { createElement } from "./utils/dom";
 import { Controller } from "./controllers/Controller";
 import {
@@ -252,7 +253,7 @@ export class Folder extends ControlPanelContainer {
   }
 }
 
-export class GUI extends ControlPanelContainer {
+export class ControlPanel extends ControlPanelContainer {
   domElement: HTMLDetailsElement;
   summaryElement: HTMLElement;
   contentElement: HTMLElement;
@@ -261,6 +262,8 @@ export class GUI extends ControlPanelContainer {
 
   constructor(container?: HTMLElement, options: ControlPanelOptions = {}) {
     super();
+
+    injectStyles();
 
     this.domElement = createElement("details", {
       className: "cp-root",
@@ -272,7 +275,9 @@ export class GUI extends ControlPanelContainer {
     });
     this.domElement.appendChild(this.summaryElement);
 
-    const titleSpan = createElement("span", {}, [options.title || "GUI"]);
+    const titleSpan = createElement("span", {}, [
+      options.title || "ControlPanel",
+    ]);
     this.summaryElement.appendChild(titleSpan);
 
     this.stats = new Stats();
@@ -332,7 +337,7 @@ export class GUI extends ControlPanelContainer {
     }
 
     // Presets Manager
-    const presetsTitle = options.title || "GUI";
+    const presetsTitle = options.title || "ControlPanel";
     this.presetStoragePrefix = `cp-presets-${presetsTitle}-`;
 
     // Presets Folder
@@ -456,7 +461,7 @@ export class GUI extends ControlPanelContainer {
         const a = document.createElement("a");
         a.href = url;
 
-        // Filename: {guiTitle}-preset-{presetName}-{timestamp}.json
+        // Filename: {controlPanelTitle}-preset-{presetName}-{timestamp}.json
         const timestamp = new Date().toISOString().split("T")[0];
         const sanitizedName = presetsState.selected
           .replace(/[^a-z0-9]/gi, "-")
@@ -549,7 +554,7 @@ export class GUI extends ControlPanelContainer {
     try {
       localStorage.setItem(key, JSON.stringify(state));
     } catch (e) {
-      console.warn("GUI: Failed to save to localStorage", e);
+      console.warn("ControlPanel: Failed to save to localStorage", e);
     }
   }
 
@@ -561,7 +566,7 @@ export class GUI extends ControlPanelContainer {
         this.load(state);
       }
     } catch (e) {
-      console.warn("GUI: Failed to load from localStorage", e);
+      console.warn("ControlPanel: Failed to load from localStorage", e);
     }
   }
 

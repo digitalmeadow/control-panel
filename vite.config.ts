@@ -9,7 +9,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "ControlPanel",
-      fileName: "control-panel",
+      fileName: "index",
     },
   },
 });

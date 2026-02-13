@@ -118,6 +118,9 @@ export class NumberController extends Controller<number> {
     this.stepInput = stepRes.input;
     settings.appendChild(stepRes.row);
 
+    const separator = createElement("hr", { className: "cp-separator" });
+    settings.appendChild(separator);
+
     // Signal Handler
     this.signalHandler = new SignalHandler({
       container: settings,

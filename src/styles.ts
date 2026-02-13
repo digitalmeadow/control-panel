@@ -1,3 +1,4 @@
+const styles = `
 .cp-root {
   position: fixed;
   top: 10px;
@@ -277,4 +278,18 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+`;
+
+let stylesInjected = false;
+
+export function injectStyles() {
+  if (stylesInjected) return;
+
+  const styleElement = document.createElement("style");
+  styleElement.id = "control-panel-styles";
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
+
+  stylesInjected = true;
 }
