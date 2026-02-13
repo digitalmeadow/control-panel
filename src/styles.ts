@@ -83,7 +83,7 @@ const styles = `
 .cp-input-number {
   width: 50%;
   background: transparent;
-  border: 1px solid #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: inherit;
   padding: 2px 4px;
   border-radius: 2px;

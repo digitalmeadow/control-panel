@@ -1,4 +1,5 @@
 import { ControlPanel } from "../src/ControlPanel";
+import factoryPresets from "./presets.json";
 
 const state = {
   number: 50,
@@ -66,6 +67,24 @@ draw();
 
 const controlPanel = new ControlPanel(undefined, { title: "Control Panel" });
 
+// Factory Presets
+const factoryPresetsFolder = controlPanel.addFolder("_Factory Presets");
+const factoryState = {
+  selected: Object.keys(factoryPresets)[0],
+};
+
+const factorySelect = factoryPresetsFolder.addSelect(factoryState, "selected", {
+  label: "Preset",
+  options: Object.keys(factoryPresets),
+});
+
+factoryPresetsFolder.addButton("Load", () => {
+  const presetName = factoryState.selected;
+  const preset = factoryPresets[presetName as keyof typeof factoryPresets];
+  controlPanel.load(preset);
+  factorySelect.setValue(presetName);
+});
+
 controlPanel
   .addNumber(state, "number", { min: 0, max: 100, step: 1 })
   .onChange((v) => log("number", v));
@@ -113,9 +132,9 @@ disabled.addSelect(state, "select", { disabled: true, options: ["A", "B"] });
 disabled.addBoolean(state, "boolean", { disabled: true });
 disabled.addColor(state, "color", { disabled: true });
 disabled.addButton("Button", () => {}, { disabled: true });
-disabled.addRadio(state, "shape", {
+disabled.addRadio(state, "radio", {
   disabled: true,
-  options: ["circle", "square"],
+  options: ["option a", "option b"],
 });
 
 controlPanel.saveDefaultPreset();

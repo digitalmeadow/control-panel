@@ -1,0 +1,56 @@
+{
+  "Spinning Square": {
+    "controllers": {
+      "number": 75,
+      "select": "Option 1",
+      "boolean": true,
+      "color": "#3498db"
+    },
+    "folders": {
+      "Advanced": {
+        "controllers": {
+          "gradient": "#ff0000,#ff00ff",
+          "arrayColors": "#e74c3c,#f39c12,#3498db"
+        },
+        "folders": {
+          "Transform": {
+            "controllers": {
+              "rotation": 0,
+              "scale": 1.5,
+              "opacity": 0.8,
+              "shape": "square"
+            },
+            "folders": {}
+          }
+        }
+      }
+    }
+  },
+  "Pulsing Circle": {
+    "controllers": {
+      "number": 30,
+      "select": "Option 3",
+      "boolean": false,
+      "color": "#e74c3c"
+    },
+    "folders": {
+      "Advanced": {
+        "controllers": {
+          "gradient": "#27ae60,#2ecc71",
+          "arrayColors": "#9b59b6,#8e44ad,#34495e"
+        },
+        "folders": {
+          "Transform": {
+            "controllers": {
+              "rotation": 45,
+              "scale": 2.0,
+              "opacity": 0.6,
+              "shape": "circle"
+            },
+            "folders": {}
+          }
+        }
+      }
+    }
+  }
+}
