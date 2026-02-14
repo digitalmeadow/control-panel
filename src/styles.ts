@@ -352,6 +352,7 @@ const styles = `
   width: var(--cp-swatch-size);
   height: var(--cp-swatch-size);
   border: 1px solid var(--cp-color-1);
+  border-radius: 50%;
   -webkit-appearance: none;
 }
 .cp-input-color::-webkit-color-swatch-wrapper {
