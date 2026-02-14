@@ -4,6 +4,7 @@ import factoryPresets from "./presets.json";
 const state = {
   backgroundColor: "#ffffff",
   number: 50,
+  simpleNumber: 0,
   select: "Option 2",
   boolean: true,
   color: "#3498db",
@@ -93,16 +94,21 @@ controlPanel.addColor(state, "backgroundColor").onChange((v) => {
 });
 
 controlPanel
-  .addNumber(state, "number", { min: 0, max: 100, step: 1 })
+  .addRange(state, "number", { min: 0, max: 100, step: 1 })
   .onChange((v) => log("number", v));
 controlPanel
   .addSelect(state, "select", {
     options: ["Option 1", "Option 2", "Option 3"],
   })
   .onChange((v) => log("select", v));
+
+controlPanel.addNumber(state, "simpleNumber", { label: "Number" }).onChange((v) => log("simpleNumber", v));
+
 controlPanel.addBoolean(state, "boolean").onChange((v) => log("boolean", v));
 controlPanel.addColor(state, "color").onChange((v) => log("color", v));
 controlPanel.addButton("Reset", () => controlPanel.reset());
+
+controlPanel.addSeparator();
 
 const folder = controlPanel.addFolder("Advanced");
 
@@ -121,24 +127,24 @@ folder
 
 const nested = folder.addFolder("Transform");
 nested
-  .addNumber(state, "rotation", { min: 0, max: 360 })
+  .addRange(state, "rotation", { min: 0, max: 360 })
   .onChange((v) => log("rotation", v));
 nested
-  .addNumber(state, "scale", { min: 0.1, max: 3, step: 0.1 })
+  .addRange(state, "scale", { min: 0.1, max: 3, step: 0.1 })
   .onChange((v) => log("scale", v));
 nested
-  .addNumber(state, "opacity", { min: 0, max: 1, step: 0.01 })
+  .addRange(state, "opacity", { min: 0, max: 1, step: 0.01 })
   .onChange((v) => log("opacity", v));
 nested
   .addRadio(state, "shape", { options: ["circle", "square"] })
   .onChange((v) => log("shape", v));
 
 const disabled = controlPanel.addFolder("Disabled");
-disabled.addNumber(state, "number", { disabled: true, min: 0, max: 100 });
+disabled.addRange(state, "number", { disabled: true, min: 0, max: 100 });
 disabled.addSelect(state, "select", { disabled: true, options: ["A", "B"] });
 disabled.addBoolean(state, "boolean", { disabled: true });
 disabled.addColor(state, "color", { disabled: true });
-disabled.addButton("Button", () => {}, { disabled: true });
+disabled.addButton("Button", () => { }, { disabled: true });
 disabled.addRadio(state, "radio", {
   disabled: true,
   options: ["option a", "option b"],

@@ -117,7 +117,7 @@ export class ArrayController extends Controller<string> {
     this.itemsContainer.innerHTML = "";
 
     this.items.forEach((item, index) => {
-      const row = createElement("div", { className: "cp-setting-row" });
+      const row = createElement("div", { className: "cp-array-row" });
 
       // Item input based on type
       let input: HTMLInputElement;

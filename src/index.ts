@@ -1,6 +1,7 @@
 export * from "./ControlPanel";
 export * from "./controllers/Controller";
 export * from "./controllers/NumberController";
+export * from "./controllers/RangeController";
 export * from "./controllers/SelectController";
 export * from "./controllers/BooleanController";
 export * from "./controllers/ButtonController";

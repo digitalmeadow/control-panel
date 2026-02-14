@@ -1,3 +1,4 @@
+import "./fonts/font.css";
 import { injectStyles } from "./styles";
 
 import { createElement } from "./utils/dom";
@@ -6,6 +7,10 @@ import {
   NumberController,
   type NumberControllerOptions,
 } from "./controllers/NumberController";
+import {
+  RangeController,
+  type RangeControllerOptions,
+} from "./controllers/RangeController";
 import {
   SelectController,
   type SelectControllerOptions,
@@ -58,6 +63,17 @@ export abstract class ControlPanelContainer {
     options: NumberControllerOptions = {},
   ) {
     const controller = new NumberController(object, property, options);
+    this.contentElement.appendChild(controller.domElement);
+    this.controllers.push(controller);
+    return controller;
+  }
+
+  addRange(
+    object: any,
+    property: string,
+    options: RangeControllerOptions = {},
+  ) {
+    const controller = new RangeController(object, property, options);
     this.contentElement.appendChild(controller.domElement);
     this.controllers.push(controller);
     return controller;
@@ -145,6 +161,11 @@ export abstract class ControlPanelContainer {
     this.contentElement.appendChild(folder.domElement);
     this.folders.push(folder);
     return folder;
+  }
+
+  addSeparator() {
+    const hr = createElement("hr", { className: "cp-separator" });
+    this.contentElement.appendChild(hr);
   }
 
   save(): ControlPanelSectionState {
@@ -368,7 +389,7 @@ export class ControlPanel extends ControlPanelContainer {
       });
 
     signalsFolder
-      .addNumber(audioSignals, "smoothingTimeConstant", {
+      .addRange(audioSignals, "smoothingTimeConstant", {
         min: 0,
         max: 0.99,
         step: 0.01,
@@ -378,7 +399,7 @@ export class ControlPanel extends ControlPanelContainer {
         audioSignals.analyser.smoothingTimeConstant = value;
       });
 
-    signalsFolder.addNumber(audioSignals, "spectrumBoost", {
+    signalsFolder.addRange(audioSignals, "spectrumBoost", {
       min: 1.0,
       max: 5.0,
       step: 0.1,
@@ -598,10 +619,10 @@ export class ControlPanel extends ControlPanelContainer {
     });
 
     presetsFolder.addButton("Load", () => presetsState.load());
-    presetsFolder.addButton("Save / New", () => presetsState.save());
+    presetsFolder.addButton("Save", () => presetsState.save());
     presetsFolder.addButton("Delete", () => presetsState.delete());
-    presetsFolder.addButton("Export JSON", () => presetsState.export());
-    presetsFolder.addButton("Import JSON", () => presetsState.import());
+    presetsFolder.addButton("Export", () => presetsState.export());
+    presetsFolder.addButton("Import", () => presetsState.import());
   }
 
   saveToLocalStorage(key: string) {

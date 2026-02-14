@@ -132,7 +132,7 @@ export class GradientController extends Controller<string> {
     this.stopsContainer.innerHTML = "";
 
     this.stops.forEach((stop, index) => {
-      const row = createElement("div", { className: "cp-setting-row" });
+      const row = createElement("div", { className: "cp-array-row" });
 
       // Color Input
       const colorInput = createElement("input", {
@@ -144,6 +144,9 @@ export class GradientController extends Controller<string> {
         stop.color = (e.target as HTMLInputElement).value;
         this.updateOutput();
       });
+
+      // Wrapper for position + delete
+      const posDeleteWrapper = createElement("div", { className: "cp-gradient-stop" });
 
       // Position Input
       const posInput = createElement("input", {
@@ -159,7 +162,7 @@ export class GradientController extends Controller<string> {
         if (isNaN(val)) val = 0;
         stop.position = Math.max(0, Math.min(1, val));
         this.sortStops();
-        this.renderStops(); // Re-render to show sorted order
+        this.renderStops();
         this.updateOutput();
       });
 
@@ -170,9 +173,11 @@ export class GradientController extends Controller<string> {
         this.updateOutput();
       });
 
+      posDeleteWrapper.appendChild(posInput);
+      posDeleteWrapper.appendChild(delBtn);
+
       row.appendChild(colorInput);
-      row.appendChild(posInput);
-      row.appendChild(delBtn);
+      row.appendChild(posDeleteWrapper);
       this.stopsContainer.appendChild(row);
     });
   }

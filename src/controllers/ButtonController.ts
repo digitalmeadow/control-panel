@@ -1,7 +1,7 @@
 import { Controller, type ControllerOptions } from "./Controller";
 import { createElement } from "../utils/dom";
 
-export interface ButtonControllerOptions extends ControllerOptions {}
+export interface ButtonControllerOptions extends ControllerOptions { }
 
 export class ButtonController extends Controller<() => void> {
   button: HTMLButtonElement;
@@ -14,6 +14,9 @@ export class ButtonController extends Controller<() => void> {
     // Create a dummy object to hold the function
     const object = { action: fn };
     super(object, "action", options);
+
+    // Hide labels for button controllers
+    this.domElement.querySelector(".cp-label")?.remove();
 
     const buttonText = options.label ?? label;
     this.button = createElement("button", { className: "cp-button" }, [
@@ -31,5 +34,5 @@ export class ButtonController extends Controller<() => void> {
     this.appendWidget(this.button);
   }
 
-  updateDisplay() {}
+  updateDisplay() { }
 }

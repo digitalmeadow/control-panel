@@ -291,13 +291,13 @@ export class SignalHandler {
       ].includes(val);
       const isAudio = ["volume", "bass", "mids", "highs"].includes(val);
 
-      this.midiRow.style.display = isMidi ? "flex" : "none";
-      this.mathParamsContainer.style.display = isMath ? "flex" : "none";
+      this.midiRow.style.display = isMidi ? "grid" : "none";
+      this.mathParamsContainer.style.display = isMath ? "grid" : "none";
       if (isMath) {
         this.updateMathParams(val as MathSignalType);
       }
-      this.easeRow.style.display = "flex";
-      this.behaviourRow.style.display = "flex";
+      this.easeRow.style.display = "grid";
+      this.behaviourRow.style.display = "grid";
 
       if (isAudio) {
         this.currentMidiId = null;
