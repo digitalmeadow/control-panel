@@ -34,7 +34,6 @@ export class GradientController extends Controller<string> {
   private manualPosition: number = 0;
 
   // UI
-  displayColor: HTMLElement;
   displayText: HTMLElement;
   stopsContainer: HTMLElement;
 
@@ -66,18 +65,12 @@ export class GradientController extends Controller<string> {
       className: "cp-controller-summary-content",
     });
 
-    this.displayColor = createElement("div", {
-      className: "cp-color-swatch",
-      style: `background-color: ${this.value}`,
-    });
-
     this.displayText = createElement(
       "span",
       { className: "cp-value-display" },
       [String(this.value)],
     );
 
-    summaryContent.appendChild(this.displayColor);
     summaryContent.appendChild(this.displayText);
     summary.appendChild(summaryContent);
     details.appendChild(summary);
@@ -216,9 +209,6 @@ export class GradientController extends Controller<string> {
   }
 
   updateDisplay() {
-    if (this.displayColor) {
-      this.displayColor.style.backgroundColor = this.value;
-    }
     if (this.displayText) {
       this.displayText.textContent = this.value;
     }
