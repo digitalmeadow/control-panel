@@ -158,6 +158,7 @@ export abstract class ControlPanelContainer {
 
   addFolder(title: string): Folder {
     const folder = new Folder(title);
+    this.addSeparator();
     this.contentElement.appendChild(folder.domElement);
     this.folders.push(folder);
     return folder;
@@ -267,10 +268,6 @@ export class Folder extends ControlPanelContainer {
       className: "cp-content cp-folder-content",
     });
     this.domElement.appendChild(this.contentElement);
-
-    this.domElement.appendChild(
-      createElement("hr", { className: "cp-separator" }),
-    );
   }
 }
 

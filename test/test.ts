@@ -108,8 +108,6 @@ controlPanel.addBoolean(state, "boolean").onChange((v) => log("boolean", v));
 controlPanel.addColor(state, "color").onChange((v) => log("color", v));
 controlPanel.addButton("Reset", () => controlPanel.reset());
 
-controlPanel.addSeparator();
-
 const folder = controlPanel.addFolder("Advanced");
 
 folder

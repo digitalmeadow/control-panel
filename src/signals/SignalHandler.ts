@@ -141,6 +141,10 @@ export class SignalHandler {
     this.easeRow.style.display = "none";
     this.easeSelect.value = this.currentEase;
     container.appendChild(this.easeRow);
+
+    // Add separator
+    const separator = createElement("hr", { className: "cp-separator" });
+    container.appendChild(separator);
   }
 
   private createSettingSelect(
