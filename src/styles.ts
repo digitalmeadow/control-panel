@@ -1,6 +1,6 @@
 const styles = `
 .cp-root {
-  --cp-scale: 2;
+  --cp-scale: 1;
   
   --cp-space-1: calc(1px * var(--cp-scale));
   --cp-space-2: calc(2px * var(--cp-scale));

@@ -29,7 +29,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc",
+    "build": "vite build && tsc && cp -r src/fonts dist/fonts",
     "preview": "vite preview"
   },
   "devDependencies": {
