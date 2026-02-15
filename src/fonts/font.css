@@ -8,8 +8,8 @@
 
 @font-face {
   font-family: "IosevkaTermNF";
-  src: url("./IosevkaTermNF-Medium.woff2") format("woff2");
-  font-weight: 500;
+  src: url("./IosevkaTermNFP-SemiBold.woff2") format("woff2");
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }

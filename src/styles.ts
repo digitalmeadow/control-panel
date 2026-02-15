@@ -8,7 +8,7 @@ const styles = `
   --cp-swatch-size: 14px;
   --cp-font-size-main: 10px;
   --cp-font-size-details: 1.0em;
-  --cp-font-weight-bold: 500;
+  --cp-font-weight-bold: 600;
   --cp-padding-v: 4px;
   
   position: absolute;
