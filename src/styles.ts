@@ -1,6 +1,6 @@
 const styles = `
 .cp-root {
-  --cp-scale: 1;
+  --cp-scale: 2;
   
   --cp-space-1: calc(1px * var(--cp-scale));
   --cp-space-2: calc(2px * var(--cp-scale));
@@ -8,6 +8,8 @@ const styles = `
   --cp-space-6: calc(6px * var(--cp-scale));
   --cp-space-8: calc(8px * var(--cp-scale));
   
+  --cp-border-width: calc(1px * var(--cp-scale));
+
   --cp-font-size-main: calc(10px * var(--cp-scale));
   --cp-font-size-details: calc(10px * var(--cp-scale));
   
@@ -142,7 +144,7 @@ const styles = `
   padding: var(--cp-space-2) var(--cp-space-4);
   background: transparent;
   color: inherit;
-  border: 1px solid var(--cp-color-2);
+  border: var(--cp-border-width) solid var(--cp-color-2);
   border-radius: var(--cp-border-radius);
   font-family: inherit;
   font-size: inherit;
@@ -186,7 +188,7 @@ const styles = `
   -moz-appearance: none;
   color: transparent;
   background: transparent;
-  border: 1px solid var(--cp-color-2);
+  border: var(--cp-border-width) solid var(--cp-color-2);
   border-radius: var(--cp-border-radius);
   outline: none;
   font-size: 0;
@@ -292,7 +294,7 @@ const styles = `
   margin: var(--cp-space-4) 0;
   width: 100%;
   border: none;
-  border-top: 1px solid var(--cp-color-1);
+  border-top: var(--cp-border-width) solid var(--cp-color-1);
 }
 
 .cp-setting-row {
@@ -360,7 +362,7 @@ const styles = `
 .cp-input-color {
   width: var(--cp-swatch-size);
   height: var(--cp-swatch-size);
-  border: 1px solid var(--cp-color-1);
+  border: var(--cp-border-width) solid var(--cp-color-1);
   border-radius: 50%;
   -webkit-appearance: none;
 }
