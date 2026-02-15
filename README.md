@@ -16,6 +16,7 @@ npm install @digitalmeadow/control-panel
 ## Controllers
 
 - Number
+- Range
 - Select
 - Boolean
 - Button
