@@ -2,6 +2,11 @@
 
 GUI control panel for creative coding.
 
+## Installation
+```bash
+npm install @digitalmeadow/control-panel
+```
+
 ## Features
 
 - Dependency free
@@ -27,7 +32,7 @@ import { ControlPanel } from "@digitalmeadow/control-panel";
 const state = { number: 50, color: "#3498db", enabled: true };
 const controlPanel = new ControlPanel();
 
-controlPanel.addNumber(state, "number", { min: 0, max: 100, step: 1 });
+controlPanel.addRange(state, "number", { min: 0, max: 100, step: 1 });
 controlPanel.addColor(state, "color");
 controlPanel.addBoolean(state, "enabled");
 controlPanel.addButton("Reset", () => controlPanel.reset());
@@ -56,6 +61,7 @@ pnpm build
 
 ```typescript
 controlPanel.addNumber(object, property, options?)
+controlPanel.addRange(object, property, options?)
 controlPanel.addSelect(object, property, options?)
 controlPanel.addBoolean(object, property, options?)
 controlPanel.addButton(label, fn, options?)
