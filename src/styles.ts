@@ -1,6 +1,6 @@
 const styles = `
 .cp-root {
-  --cp-scale: 1;
+  --cp-scale: 2;
   
   --cp-space-1: calc(1px * var(--cp-scale));
   --cp-space-2: calc(2px * var(--cp-scale));
@@ -45,7 +45,7 @@ const styles = `
     var(--cp-font-family), monospace,
     sans-serif;
   font-size: var(--cp-font-size-main);
-  line-height: 1.05;
+  line-height: 1.1;
 }
 
 /* Apply blend mode to selected children except color inputs */
@@ -103,7 +103,7 @@ const styles = `
   float: right;
   font-weight: normal;
   font-variant-numeric: tabular-nums;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .cp-content {
@@ -135,7 +135,6 @@ const styles = `
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: 0.8;
   user-select: none;
 }
 
@@ -177,8 +176,8 @@ const styles = `
 .cp-checkbox {
   margin: auto 0;
   box-sizing: border-box;
-  width: var(--cp-controller-min-height);
-  height: var(--cp-controller-min-height);
+  width: var(--cp-swatch-size);
+  height: var(--cp-swatch-size);
   padding: 0;
   display: inline-block;
   vertical-align: middle;
@@ -187,7 +186,7 @@ const styles = `
   -moz-appearance: none;
   color: transparent;
   background: transparent;
-  border: 1px solid var(--cp-color-1);
+  border: 1px solid var(--cp-color-2);
   border-radius: var(--cp-border-radius);
   outline: none;
   font-size: 0;
@@ -196,7 +195,8 @@ const styles = `
 }
 
 .cp-checkbox:checked {
-  background: var(--cp-color-1);
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='var(--cp-swatch-size)' height='var(--cp-swatch-size)' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='2' fill='%23fff'/%3E%3C/svg%3E");
 }
 
 .cp-button {
@@ -278,7 +278,6 @@ const styles = `
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-size: var(--cp-font-size-details);
-  opacity: 0.8;
   user-select: none;
 }
 
@@ -298,7 +297,7 @@ const styles = `
 
 .cp-setting-row {
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: calc(50% - (var(--cp-space-2) / 2)) calc(50% - (var(--cp-space-2) / 2));
   align-items: center;
   gap: var(--cp-space-2);
 }
@@ -326,7 +325,6 @@ const styles = `
 
 .cp-setting-label {
   font-size: var(--cp-font-size-details);
-  opacity: 0.7;
 }
 
 .cp-radios {
