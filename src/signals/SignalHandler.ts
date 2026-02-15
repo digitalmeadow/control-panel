@@ -114,7 +114,7 @@ export class SignalHandler {
 
     // Math Signal Parameters Container
     this.mathParamsContainer = createElement("div", {
-      style: "display: none; flex-direction: column; gap: 4px;",
+      className: "cp-number-settings",
     });
     container.appendChild(this.mathParamsContainer);
 
