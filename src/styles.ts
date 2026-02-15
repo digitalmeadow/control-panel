@@ -1,6 +1,6 @@
 const styles = `
 .cp-root {
-  --cp-scale: 1.0;
+  --cp-scale: 1;
   
   --cp-space-1: calc(1px * var(--cp-scale));
   --cp-space-2: calc(2px * var(--cp-scale));
@@ -62,7 +62,7 @@ const styles = `
 .cp-root .cp-radio,
 .cp-root .cp-checkbox
 {
-  mix-blend-mode: difference;
+  mix-blend-mode: exclusion;
 }
 
 .cp-root .cp-input-color,
@@ -83,7 +83,7 @@ const styles = `
   background: transparent;
 }
 .cp-root::-webkit-scrollbar-thumb {
-  background: var(--cp-color-4);
+  background: #777;
 }
 
 .cp-summary {
@@ -236,7 +236,7 @@ const styles = `
 }
 
 .cp-controller-summary-content {
-  width: calc(100% - var(--cp-button-delete-width));
+  width: calc(100% - 2ch);
   min-height: var(--cp-controller-min-height);
   vertical-align: middle;
   display: inline-flex;
