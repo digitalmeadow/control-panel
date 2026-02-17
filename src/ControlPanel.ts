@@ -1,4 +1,3 @@
-import "./fonts/font.css";
 import { injectStyles } from "./styles";
 
 import { createElement } from "./utils/dom";

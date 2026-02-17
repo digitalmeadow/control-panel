@@ -1,4 +1,29 @@
+const fontRegular = new URL(
+  "./fonts/IosevkaTermNF-Regular.woff2",
+  import.meta.url,
+).href;
+const fontSemiBold = new URL(
+  "./fonts/IosevkaTermNFP-SemiBold.woff2",
+  import.meta.url,
+).href;
+
 const styles = `
+@font-face {
+  font-family: "IosevkaTermNF";
+  src: url("${fontRegular}") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IosevkaTermNF";
+  src: url("${fontSemiBold}") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 .cp-root {
   --cp-scale: 1;
   
