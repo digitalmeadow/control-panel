@@ -39,7 +39,7 @@ import {
   type ArrayControllerOptions,
 } from "./controllers/ArrayController";
 import { audioSignals } from "./signals/AudioSignals";
-import { Stats } from "./stats";
+import { Stats } from "./Stats";
 
 export interface ControlPanelOptions {
   title?: string;
