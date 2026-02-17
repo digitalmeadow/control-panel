@@ -1,100 +1,69 @@
 # @digitalmeadow/control-panel
 
-GUI control panel for creative coding.
+Minimal GUI control panel for creative coding.
 
 ## Installation
+
 ```bash
 npm install @digitalmeadow/control-panel
 ```
 
 ## Features
 
-- Dependency free
+- Dependency-free
 - Minimal API
 - Audio and MIDI input signals
-
-## Controllers
-
-- Number
-- Range
-- Select
-- Boolean
-- Button
-- Radio
-- Color
-- Gradient
-- Array
 
 ## Usage
 
 ```typescript
 import { ControlPanel } from "@digitalmeadow/control-panel";
 
-const state = { number: 50, color: "#3498db", enabled: true };
-const controlPanel = new ControlPanel();
+const state = {
+  number: 50,
+  range: 0.5,
+  select: "option-a",
+  enabled: true,
+  color: "#3498db",
+  gradient: [
+    { color: "#ff0000", position: 0 },
+    { color: "#0000ff", position: 1 },
+  ],
+  array: ["item-1", "item-2"],
+  radio: "option-a",
+};
 
-controlPanel.addRange(state, "number", { min: 0, max: 100, step: 1 });
-controlPanel.addColor(state, "color");
-controlPanel.addBoolean(state, "enabled");
-controlPanel.addButton("Reset", () => controlPanel.reset());
+const panel = new ControlPanel();
 
-controlPanel.saveDefaultPreset();
+panel
+  .addNumber(state, "number", { min: 0, max: 100, step: 1, label: "Number" })
+  .onChange((value) => console.log("number changed:", value));
+
+panel.addRange(state, "range", { min: 0, max: 1, step: 0.01 });
+
+panel.addSelect(state, "select", {
+  label: "Dropdown",
+  options: ["option-a", "option-b", "option-c"],
+});
+
+panel.addBoolean(state, "enabled", { label: "Enabled" });
+
+panel.addRadio(state, "radio", {
+  label: "Radio",
+  options: ["option-a", "option-b"],
+});
+
+panel.addColor(state, "color", { label: "Color" });
+
+panel.addGradient(state, "gradient", { label: "Gradient" });
+
+panel.addArray(state, "array", {
+  label: "Array",
+  itemType: "string",
+});
+
+panel.addButton("Reset", () => panel.reset());
+
+const folder = panel.addFolder("Settings");
+folder.addNumber(state, "number", { min: 0, max: 100 });
 ```
-
-## Folders
-
-```typescript
-const folder = controlPanel.addFolder("Settings");
-folder.addNumber(state, "value", { min: 0, max: 100 });
-
-const nested = folder.addFolder("Advanced");
-nested.addNumber(state, "other", { min: 0, max: 100 });
-```
-
-## Development
-
-```bash
-pnpm dev
-pnpm build
-```
-
-## API
-
-```typescript
-controlPanel.addNumber(object, property, options?)
-controlPanel.addRange(object, property, options?)
-controlPanel.addSelect(object, property, options?)
-controlPanel.addBoolean(object, property, options?)
-controlPanel.addButton(label, fn, options?)
-controlPanel.addRadio(object, property, options?)
-controlPanel.addColor(object, property, options?)
-controlPanel.addGradient(object, property, options?)
-controlPanel.addArray(object, property, options?)
-controlPanel.addFolder(title)
-
-controlPanel.save()
-controlPanel.load(state)
-controlPanel.reset()
-controlPanel.saveDefaultPreset()
-```
-
-## Options
-
-All controllers:
-- `label?: string`
-- `disabled?: boolean`
-- `id?: string`
-
-Number:
-- `min?: number`
-- `max?: number`
-- `step?: number`
-
-Select/Radio:
-- `options?: T[]`
-
-Gradient:
-- `stops?: ColorStop[]`
-
-Array:
-- `itemType?: "color" | "number" | "string"`
