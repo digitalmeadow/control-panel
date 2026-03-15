@@ -1,5 +1,4 @@
 import { injectStyles } from "./styles";
-
 import { createElement } from "./utils/dom";
 import { Controller } from "./controllers/Controller";
 import {
@@ -44,6 +43,7 @@ import { Stats } from "./Stats";
 export interface ControlPanelOptions {
   title?: string;
   presetsPrefix?: string;
+  theme?: string;
 }
 
 export interface ControlPanelSectionState {
@@ -277,7 +277,10 @@ export class ControlPanel extends ControlPanelContainer {
   stats: Stats;
   private presetStoragePrefix: string;
 
-  constructor(container?: HTMLElement, options: ControlPanelOptions = {}) {
+  constructor(
+    container?: HTMLElement,
+    options: ControlPanelOptions = { theme: "dark" },
+  ) {
     super();
 
     injectStyles();
@@ -286,6 +289,8 @@ export class ControlPanel extends ControlPanelContainer {
       className: "cp-root",
       open: true,
     });
+
+    this.domElement.classList.add(`cp-theme--${options.theme}`);
 
     this.summaryElement = createElement("summary", {
       className: "cp-summary cp-summary-root",

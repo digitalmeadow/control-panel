@@ -7,6 +7,8 @@ const fontSemiBold = new URL(
   import.meta.url,
 ).href;
 
+export type ControlPanelTheme = "dark" | "transparent";
+
 const styles = `
 @font-face {
   font-family: "IosevkaTermNF";
@@ -45,6 +47,7 @@ const styles = `
   --cp-icon-position: calc(4px * var(--cp-scale));
   --cp-select-arrow-space: calc(14px * var(--cp-scale));
   
+  --cp-color-bg: rgba(0, 0, 0, 0.95);
   --cp-color-1: rgba(255, 255, 255, 0.15);
   --cp-color-2: rgba(255, 255, 255, 0.25);
   --cp-color-3: rgba(255, 255, 255, 0.35);
@@ -52,6 +55,8 @@ const styles = `
   --cp-border-radius: 0px;
   --cp-font-weight-bold: 600;
   --cp-padding-v: calc(4px * var(--cp-scale));
+
+  --cp-mix-blend-mode: normal;
   
   position: absolute;
   top: 0;
@@ -89,7 +94,7 @@ const styles = `
 .cp-root .cp-radio,
 .cp-root .cp-checkbox
 {
-  mix-blend-mode: exclusion;
+  mix-blend-mode: var(--cp-mix-blend-mode);
 }
 
 .cp-root .cp-input-color,
@@ -111,6 +116,21 @@ const styles = `
 }
 .cp-root::-webkit-scrollbar-thumb {
   background: #777;
+}
+
+/* Themes */
+cp-root.cp-theme--dark {
+  --cp-color-bg: rgba(0, 0, 0, 0.95);
+  --cp-mix-blend-mode: normal;
+  background-color: var(--cp-color-bg);
+}
+.cp-root.cp-theme--transparent {
+  --cp-color-bg: transparent;
+  --cp-mix-blend-mode: exclusion;
+  background-color: var(--cp-color-bg);
+}
+.cp-root {
+  background-color: var(--cp-color-bg);
 }
 
 .cp-summary {
