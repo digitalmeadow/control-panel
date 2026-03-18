@@ -279,7 +279,11 @@ export class ControlPanel extends ControlPanelContainer {
 
   constructor(
     container?: HTMLElement,
-    options: ControlPanelOptions = { theme: "dark" },
+    options: ControlPanelOptions = {
+      title: "Control Panel",
+      presetsPrefix: "preset-",
+      theme: "dark",
+    },
   ) {
     super();
 
