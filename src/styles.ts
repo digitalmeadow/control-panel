@@ -48,6 +48,7 @@ const styles = `
   --cp-select-arrow-space: calc(14px * var(--cp-scale));
   
   --cp-color-bg: rgba(0, 0, 0, 0.95);
+  --cp-color-fg: rgba(255, 255, 255, 0.8);
   --cp-color-1: rgba(255, 255, 255, 0.15);
   --cp-color-2: rgba(255, 255, 255, 0.25);
   --cp-color-3: rgba(255, 255, 255, 0.35);
@@ -70,7 +71,7 @@ const styles = `
   overflow: auto;
   resize: both;
 
-  color: #fff;
+  color: var(--cp-color-fg);
   background: transparent;
 
   font-family:
