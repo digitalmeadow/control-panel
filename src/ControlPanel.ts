@@ -44,6 +44,10 @@ export interface ControlPanelOptions {
   title?: string;
   presetsPrefix?: string;
   theme?: string;
+  rootOpen?: boolean;
+  expandDirection?: "down" | "up";
+  foldersCollapsed?: boolean;
+  foldersExpanded?: string[];
 }
 
 export interface ControlPanelSectionState {
@@ -245,13 +249,13 @@ export class Folder extends ControlPanelContainer {
   summaryElement: HTMLElement;
   title: string;
 
-  constructor(title: string) {
+  constructor(title: string, open: boolean = true) {
     super();
     this.title = title;
 
     this.domElement = createElement("details", {
       className: "cp-folder",
-      open: true,
+      open,
     });
 
     this.summaryElement = createElement(
@@ -268,6 +272,7 @@ export class Folder extends ControlPanelContainer {
     });
     this.domElement.appendChild(this.contentElement);
   }
+
 }
 
 export class ControlPanel extends ControlPanelContainer {
@@ -276,6 +281,8 @@ export class ControlPanel extends ControlPanelContainer {
   contentElement: HTMLElement;
   stats: Stats;
   private presetStoragePrefix: string;
+  private foldersCollapsed: boolean;
+  private foldersExpanded: string[];
 
   constructor(
     container?: HTMLElement,
@@ -287,11 +294,14 @@ export class ControlPanel extends ControlPanelContainer {
   ) {
     super();
 
+    this.foldersCollapsed = options.foldersCollapsed ?? false;
+    this.foldersExpanded = options.foldersExpanded ?? [];
+
     injectStyles();
 
     this.domElement = createElement("details", {
       className: "cp-root",
-      open: true,
+      open: options.rootOpen ?? true,
     });
 
     this.domElement.classList.add(`cp-theme--${options.theme}`);
@@ -311,6 +321,7 @@ export class ControlPanel extends ControlPanelContainer {
 
     // Drag functionality
     let isDragging = false;
+    let dragMoved = false;
     let dragStartX = 0;
     let dragStartY = 0;
     let panelStartX = 0;
@@ -321,18 +332,29 @@ export class ControlPanel extends ControlPanelContainer {
       if (e.target !== this.summaryElement && e.target !== titleSpan) return;
 
       isDragging = true;
+      dragMoved = false;
       dragStartX = e.clientX;
       dragStartY = e.clientY;
 
-      const rect = this.domElement.getBoundingClientRect();
-      panelStartX = rect.left;
-      panelStartY = rect.top;
+      const panelRect = this.domElement.getBoundingClientRect();
+      const parentRect = this.domElement.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+      panelStartX = panelRect.left - parentRect.left;
+      panelStartY = panelRect.top - parentRect.top;
 
       e.preventDefault();
     });
 
+    this.summaryElement.addEventListener("click", (e) => {
+      if (dragMoved) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
     document.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
+
+      dragMoved = true;
 
       const deltaX = e.clientX - dragStartX;
       const deltaY = e.clientY - dragStartY;
@@ -628,6 +650,16 @@ export class ControlPanel extends ControlPanelContainer {
     presetsFolder.addButton("Delete", () => presetsState.delete());
     presetsFolder.addButton("Export", () => presetsState.export());
     presetsFolder.addButton("Import", () => presetsState.import());
+
+    if (options.expandDirection === "up") this.domElement.classList.add("cp-root--expand-up");
+  }
+
+  addFolder(title: string): Folder {
+    const folder = new Folder(title, this.foldersExpanded.includes(title) ? true : this.foldersCollapsed ? false : true);
+    this.addSeparator();
+    this.contentElement.appendChild(folder.domElement);
+    this.folders.push(folder);
+    return folder;
   }
 
   saveToLocalStorage(key: string) {
