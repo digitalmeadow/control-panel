@@ -4,12 +4,11 @@ export class MidiSignals {
   isListening = false;
   resolveListen: ((id: string) => void) | null = null;
   listeningCallback: (() => void) | null = null;
+  private initialized = false;
 
-  constructor() {
-    this.init();
-  }
-
-  async init() {
+  async ensureInit() {
+    if (this.initialized) return;
+    this.initialized = true;
     if (
       typeof navigator !== "undefined" &&
       (navigator as any).requestMIDIAccess
@@ -93,8 +92,8 @@ export class MidiSignals {
     return 0;
   }
 
-  listen(): Promise<string> {
-    // If already listening, cancel previous?
+  async listen(): Promise<string> {
+    await this.ensureInit();
     this.isListening = true;
     return new Promise((resolve) => {
       this.resolveListen = resolve;
@@ -107,6 +106,7 @@ export class MidiSignals {
   }
 
   getSignal(id: string) {
+    if (!this.initialized) return () => 0;
     return () => this.values.get(id) ?? 0;
   }
 }
