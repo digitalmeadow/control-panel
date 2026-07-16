@@ -57,6 +57,7 @@ export class RangeController extends Controller<number> {
 
     this.input = createElement("input", {
       type: "range",
+      id: this.controllerId,
       className: "cp-input-range",
       step: options.step ?? "any",
     });
@@ -238,12 +239,15 @@ export class RangeController extends Controller<number> {
     initialValue: number | undefined,
     onChange: (val: string) => void,
   ) {
+    const settingId = this.subId(label.toLowerCase());
     const row = createElement("div", { className: "cp-setting-row" });
     const labelEl = createElement("label", { className: "cp-setting-label" }, [
       label,
     ]);
+    labelEl.setAttribute("for", settingId);
     const input = createElement("input", {
       type: "number",
+      id: settingId,
       className: "cp-input-number cp-input-small",
       step: "any",
     });

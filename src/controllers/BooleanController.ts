@@ -15,6 +15,7 @@ export class BooleanController extends Controller<boolean> {
 
     this.input = createElement("input", {
       type: "checkbox",
+      id: this.controllerId,
       className: "cp-checkbox",
     });
 

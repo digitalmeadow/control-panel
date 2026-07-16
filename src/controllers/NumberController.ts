@@ -15,6 +15,7 @@ export class NumberController extends Controller<number> {
 
     this.input = createElement("input", {
       type: "number",
+      id: this.controllerId,
       className: "cp-input-number",
       value: String(this.value),
     });

@@ -16,7 +16,7 @@ export class SelectController<T> extends Controller<T> {
   ) {
     super(object, property, options);
 
-    this.select = createElement("select", { className: "cp-select" });
+    this.select = createElement("select", { id: this.controllerId, className: "cp-select" });
 
     this.optionValues = options.options || [];
 

@@ -17,9 +17,14 @@ export class RadioController<T> extends Controller<T> {
   ) {
     super(object, property, options);
 
+    // Radio uses buttons — remove for since no single input
+
     this.container = createElement("div", { className: "cp-radios" });
 
     this.optionValues = options.options || [];
+
+    const label = this.domElement.querySelector<HTMLLabelElement>(".cp-label");
+    label?.removeAttribute("for");
 
     this.optionValues.forEach((value) => {
       const btn = createElement("button", { className: "cp-button cp-radio" }, [

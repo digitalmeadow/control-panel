@@ -50,8 +50,7 @@ const styles = `
   --cp-mix-blend-mode: normal;
   
   position: absolute;
-  top: 0;
-  right: 0;
+  pointer-events: auto;
 
   width: min(280px, 90%);
   padding: var(--cp-space-8);

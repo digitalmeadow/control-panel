@@ -15,6 +15,7 @@ export class ColorController extends Controller<string> {
 
     this.input = createElement("input", {
       type: "color",
+      id: this.controllerId,
       className: "cp-input-color",
       value: this.value || "#000000",
     });

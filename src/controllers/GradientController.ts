@@ -54,6 +54,9 @@ export class GradientController extends Controller<string> {
     ];
     this.sortStops();
 
+    const label = this.domElement.querySelector<HTMLLabelElement>(".cp-label");
+    label?.removeAttribute("for");
+
     const details = createElement("details", {
       className: "cp-controller-details",
     });

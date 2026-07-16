@@ -25,6 +25,9 @@ export class ArrayController extends Controller<string> {
     // Parse initial value (comma-separated string)
     this.items = this.parseValue(this.value);
 
+    const label = this.domElement.querySelector<HTMLLabelElement>(".cp-label");
+    label?.removeAttribute("for");
+
     const details = createElement("details", {
       className: "cp-controller-details",
     });

@@ -17,8 +17,11 @@ export abstract class Controller<T> {
   static midi = midiSignals;
   static math = mathSignals;
 
+  private static _idCounter = 0;
+
   public readonly key: string;
   public readonly initialValue: T;
+  protected readonly controllerId: string;
   domElement: HTMLElement;
   protected object: any;
   protected property: string;
@@ -29,6 +32,7 @@ export abstract class Controller<T> {
     this.property = property;
     this.key = options.id ?? property;
     this.initialValue = this.object[this.property];
+    this.controllerId = `cp-${Controller._idCounter++}`;
 
     this.domElement = createElement("div", { className: "cp-controller" });
 
@@ -37,6 +41,7 @@ export abstract class Controller<T> {
       String(labelText),
     ]);
     label.setAttribute("title", String(labelText));
+    label.setAttribute("for", this.controllerId);
     this.domElement.appendChild(label);
 
     if (options.disabled) {
@@ -83,5 +88,9 @@ export abstract class Controller<T> {
 
   protected appendWidget(widget: HTMLElement) {
     this.domElement.appendChild(widget);
+  }
+
+  protected subId(suffix: string): string {
+    return `${this.controllerId}-${suffix}`;
   }
 }

@@ -48,6 +48,12 @@ export interface ControlPanelOptions {
   expandDirection?: "down" | "up";
   foldersCollapsed?: boolean;
   foldersExpanded?: string[];
+  position?: {
+    top?: number | "auto";
+    right?: number | "auto";
+    bottom?: number | "auto";
+    left?: number | "auto";
+  };
 }
 
 export interface ControlPanelSectionState {
@@ -382,6 +388,27 @@ export class ControlPanel extends ControlPanelContainer {
       }
     });
     resizeObserver.observe(this.domElement);
+
+    // Apply default positioning — restored state or explicit options override
+    const pos = options.position;
+    if (pos) {
+      if (pos.top !== undefined)
+        this.domElement.style.top =
+          typeof pos.top === "number" ? `${pos.top}px` : pos.top;
+      if (pos.right !== undefined)
+        this.domElement.style.right =
+          typeof pos.right === "number" ? `${pos.right}px` : pos.right;
+      if (pos.bottom !== undefined)
+        this.domElement.style.bottom =
+          typeof pos.bottom === "number" ? `${pos.bottom}px` : pos.bottom;
+      if (pos.left !== undefined)
+        this.domElement.style.left =
+          typeof pos.left === "number" ? `${pos.left}px` : pos.left;
+    } else {
+      // Legacy default: top-right
+      this.domElement.style.top = "0";
+      this.domElement.style.right = "0";
+    }
 
     // Restore position and size from sessionStorage
     this.restorePositionAndSize();
