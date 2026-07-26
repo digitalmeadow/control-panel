@@ -8,7 +8,7 @@ export class Stats {
   rafId: number;
 
   constructor() {
-    this.domElement = createElement("span", { className: "cp-stats" });
+    this.domElement = createElement("span", { className: "cp-stats", "aria-hidden": "true" });
     this.rafId = requestAnimationFrame(this.render);
   }
 

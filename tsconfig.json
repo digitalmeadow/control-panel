@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES6",
+    "lib": ["ES2017", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
