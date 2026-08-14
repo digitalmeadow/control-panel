@@ -53,7 +53,7 @@ const styles = `
   pointer-events: auto;
 
   width: min(280px, 90%);
-  padding: var(--cp-space-8);
+  padding: 0 var(--cp-space-4) var(--cp-space-4) var(--cp-space-4);
   max-height: 90vh;
   min-width: calc(200px * var(--cp-scale));
   min-height: calc(50px * var(--cp-scale));
@@ -96,6 +96,17 @@ const styles = `
 
 .cp-root:not([open]) .cp-summary-root {
   opacity: 0.5;
+}
+
+/* Collapsed, the summary is the whole panel, so it should be the whole height.
+   The bottom padding clears content that isn't rendered, and the floor only
+   exists to keep a resizable body usable. The summary brings its own padding. */
+.cp-root:not([open]) {
+  padding-bottom: 0;
+  min-height: 0;
+  /* Dragging the resize handle leaves an inline height behind, which would
+     stretch the collapsed bar. Only the summary counts when closed. */
+  height: auto !important;
 }
 
 .cp-root--expand-up {
@@ -193,10 +204,17 @@ const styles = `
   cursor: grab;
 }
 
+/* The root's marker states whether it is open, rather than naming the widget —
+   a static icon gave no clue the panel collapsed at all. Folders below use the
+   open/closed folder glyphs, which already carry that. */
 .cp-summary-root::before {
-  content: "\\EB52";
+  content: "[+]";
   color: var(--color-subtext0);
   margin-right: 1.5ch;
+}
+
+.cp-root[open] > .cp-summary-root::before {
+  content: "[-]";
 }
 
 .cp-stats {

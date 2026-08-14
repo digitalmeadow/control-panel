@@ -718,6 +718,9 @@ export class ControlPanel extends ControlPanelContainer {
     this.saveToLocalStorage(defaultKey);
   }
 
+  // Height is deliberately not persisted. The panel has to be free to grow as
+  // folders open, and an explicit height pins it — you get an inner scrollbar
+  // instead. Left to itself it sizes to its content and stops at max-height.
   private savePositionAndSize() {
     const rect = this.domElement.getBoundingClientRect();
     const key = `cp-position-${this.presetStoragePrefix}`;
@@ -725,7 +728,6 @@ export class ControlPanel extends ControlPanelContainer {
       left: rect.left,
       top: rect.top,
       width: this.domElement.offsetWidth,
-      height: this.domElement.offsetHeight,
     };
     try {
       sessionStorage.setItem(key, JSON.stringify(state));
@@ -745,7 +747,6 @@ export class ControlPanel extends ControlPanelContainer {
         this.domElement.style.right = "auto";
         this.domElement.style.bottom = "auto";
         this.domElement.style.width = `${state.width}px`;
-        this.domElement.style.height = `${state.height}px`;
       }
     } catch (e) {
       console.warn("Failed to restore panel position/size", e);
