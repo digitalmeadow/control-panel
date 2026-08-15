@@ -22,15 +22,23 @@ interface RangeControllerState {
   };
 }
 
+const DRAG_THRESHOLD = 3;
+
 export class RangeController extends Controller<number> {
   input: HTMLInputElement;
-  display: HTMLElement;
   private signalHandler?: SignalHandler;
   private pingPongDirection: 1 | -1 = 1;
   private min: number = 0;
   private max: number = 100;
 
   private initialOptions: RangeControllerOptions;
+  private drag: {
+    x: number;
+    value: number;
+    moved: boolean;
+    fine: boolean;
+  } | null = null;
+  private valueBeforeEdit: number = 0;
 
   // UI References
   private minInput!: HTMLInputElement;
@@ -56,32 +64,17 @@ export class RangeController extends Controller<number> {
     });
 
     this.input = createElement("input", {
-      type: "range",
+      type: "number",
       id: this.controllerId,
-      className: "cp-input-range",
+      className: "cp-input-number cp-input-scrub",
       step: options.step ?? "any",
     });
 
-    if (options.min !== undefined) this.input.min = String(options.min);
-    if (options.max !== undefined) this.input.max = String(options.max);
+    this.input.min = String(this.min);
+    this.input.max = String(this.max);
 
-    this.input.value = String(this.value);
-
-    this.display = createElement(
-      "span",
-      {
-        className: "cp-value-display",
-      },
-      [String(this.value.toFixed(1))],
-    );
-
-    this.input.addEventListener("input", () => {
-      const val = parseFloat(this.input.value);
-      if (!isNaN(val)) {
-        this.setValue(val);
-        this.display.textContent = String(val.toFixed(1));
-      }
-    });
+    this.updateDisplay();
+    this.bindScrub();
 
     this.input.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -91,7 +84,6 @@ export class RangeController extends Controller<number> {
       className: "cp-controller-summary-content",
     });
     summaryContent.appendChild(this.input);
-    summaryContent.appendChild(this.display);
 
     summary.appendChild(summaryContent);
     details.appendChild(summary);
@@ -99,14 +91,14 @@ export class RangeController extends Controller<number> {
     const settings = createElement("div", { className: "cp-number-settings" });
 
     // Min
-    const minRes = this.createSetting("min", options.min, (val) =>
+    const minRes = this.createSetting("min", this.min, (val) =>
       this.setMin(val),
     );
     this.minInput = minRes.input;
     settings.appendChild(minRes.row);
 
     // Max
-    const maxRes = this.createSetting("max", options.max, (val) =>
+    const maxRes = this.createSetting("max", this.max, (val) =>
       this.setMax(val),
     );
     this.maxInput = maxRes.input;
@@ -133,11 +125,145 @@ export class RangeController extends Controller<number> {
     this.appendWidget(details);
   }
 
+  // Drag to scrub, click to type. Focused, it behaves as a plain number field.
+  private bindScrub() {
+    this.input.addEventListener("pointerdown", (e) => {
+      if (document.activeElement === this.input) return;
+      e.preventDefault(); // suppress native focus so a drag doesn't place a caret
+      this.input.setPointerCapture(e.pointerId);
+      this.drag = {
+        x: e.clientX,
+        value: this.value,
+        moved: false,
+        fine: e.shiftKey,
+      };
+    });
+
+    this.input.addEventListener("pointermove", (e) => {
+      if (!this.drag) return;
+
+      // Re-anchor when shift is toggled so sensitivity changes don't jump.
+      if (e.shiftKey !== this.drag.fine) {
+        this.drag = {
+          x: e.clientX,
+          value: this.value,
+          moved: true,
+          fine: e.shiftKey,
+        };
+        return;
+      }
+
+      const dx = e.clientX - this.drag.x;
+      if (!this.drag.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
+      this.drag.moved = true;
+
+      const sensitivity = e.shiftKey ? 0.1 : 1;
+      this.commit(this.drag.value + dx * this.valuePerPixel() * sensitivity);
+    });
+
+    this.input.addEventListener("pointerup", (e) => {
+      if (!this.drag) return;
+      const { moved } = this.drag;
+      this.drag = null;
+      this.input.releasePointerCapture(e.pointerId);
+
+      // A press that never travelled is a click: focus ready to type over.
+      if (!moved) {
+        this.input.focus();
+        this.input.select();
+      }
+    });
+
+    this.input.addEventListener("pointercancel", () => {
+      this.drag = null;
+    });
+
+    this.input.addEventListener("focus", () => {
+      this.valueBeforeEdit = this.value;
+      this.input.value = String(this.value); // unrounded while editing
+    });
+
+    this.input.addEventListener("blur", () => {
+      const val = parseFloat(this.input.value);
+      if (isNaN(val)) this.updateDisplay();
+      else this.commit(val);
+    });
+
+    this.input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        this.input.blur();
+      } else if (e.key === "Escape") {
+        this.setValue(this.valueBeforeEdit);
+        this.input.blur();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault(); // native stepping wouldn't clamp or emit
+        const typed = parseFloat(this.input.value);
+        const from = isNaN(typed) ? this.value : typed;
+        const direction = e.key === "ArrowUp" ? 1 : -1;
+        this.commit(
+          from + direction * this.stepAmount() * (e.shiftKey ? 10 : 1),
+        );
+      }
+    });
+  }
+
+  private commit(value: number) {
+    this.setValue(this.clamp(this.roundToStep(value)));
+  }
+
+  private clamp(value: number): number {
+    if (Number.isFinite(this.min)) value = Math.max(this.min, value);
+    if (Number.isFinite(this.max)) value = Math.min(this.max, value);
+    return value;
+  }
+
+  private get hasRange(): boolean {
+    return (
+      Number.isFinite(this.min) &&
+      Number.isFinite(this.max) &&
+      this.max > this.min
+    );
+  }
+
+  // Arrow-key increment: the step if set, otherwise a percent of the range.
+  private stepAmount(): number {
+    const step = parseFloat(this.input.step);
+    if (Number.isFinite(step)) return step;
+    return this.hasRange ? (this.max - this.min) / 100 : 1;
+  }
+
+  // Full field width spans the whole range; without a range, a step per pixel.
+  private valuePerPixel(): number {
+    const width = this.input.clientWidth;
+    if (this.hasRange && width > 0) return (this.max - this.min) / width;
+    const step = parseFloat(this.input.step);
+    return Number.isFinite(step) ? step : 0.01;
+  }
+
+  private get decimals(): number {
+    const step = this.input.step;
+    const parsed = parseFloat(step);
+    if (!Number.isFinite(parsed)) return 2;
+    if (step.includes("e")) return Math.max(0, -Math.floor(Math.log10(parsed)));
+    return step.split(".")[1]?.length ?? 0;
+  }
+
+  private updateFill() {
+    const percent = this.hasRange
+      ? ((this.value - this.min) / (this.max - this.min)) * 100
+      : 0;
+    this.input.style.setProperty(
+      "--cp-fill",
+      `${Math.min(100, Math.max(0, percent))}%`,
+    );
+  }
+
   // Setters
-  setMin(val: string | number) {
-    if (typeof val === "number") val = String(val);
+  setMin(val: string | number | null | undefined) {
+    val = val === undefined || val === null ? "" : String(val);
     if (val === "" || isNaN(parseFloat(val))) {
       this.input.removeAttribute("min");
+      this.min = NaN;
     } else {
       this.input.min = val;
       this.min = parseFloat(val);
@@ -145,12 +271,14 @@ export class RangeController extends Controller<number> {
     if (this.minInput && this.minInput.value !== val) {
       this.minInput.value = val;
     }
+    this.updateFill();
   }
 
-  setMax(val: string | number) {
-    if (typeof val === "number") val = String(val);
+  setMax(val: string | number | null | undefined) {
+    val = val === undefined || val === null ? "" : String(val);
     if (val === "" || isNaN(parseFloat(val))) {
       this.input.removeAttribute("max");
+      this.max = NaN;
     } else {
       this.input.max = val;
       this.max = parseFloat(val);
@@ -158,6 +286,7 @@ export class RangeController extends Controller<number> {
     if (this.maxInput && this.maxInput.value !== val) {
       this.maxInput.value = val;
     }
+    this.updateFill();
   }
 
   setStep(val: string | number | undefined) {
@@ -176,9 +305,11 @@ export class RangeController extends Controller<number> {
         this.stepInput.value = val;
       }
     }
+    this.updateDisplay(); // step drives displayed precision
   }
 
   private applySignal(easedValue: number, behaviour: SignalBehaviour) {
+    if (!this.hasRange) return;
     const range = this.max - this.min;
     let newVal: number;
 
@@ -215,12 +346,7 @@ export class RangeController extends Controller<number> {
       }
     }
 
-    // Apply step rounding
-    newVal = this.roundToStep(newVal);
-
-    this.setValue(newVal);
-    this.input.value = String(newVal);
-    this.display.textContent = String(newVal.toFixed(1));
+    this.commit(newVal);
   }
 
   private roundToStep(value: number): number {
@@ -230,7 +356,7 @@ export class RangeController extends Controller<number> {
     }
 
     const stepValue = parseFloat(step);
-    const offset = this.min;
+    const offset = Number.isFinite(this.min) ? this.min : 0;
     return offset + Math.round((value - offset) / stepValue) * stepValue;
   }
 
@@ -264,10 +390,8 @@ export class RangeController extends Controller<number> {
   }
 
   updateDisplay() {
-    // if (document.activeElement !== this.input && !this.signalHandler) {
-    this.input.value = String(this.value);
-    this.display.textContent = String(this.value.toFixed(1));
-    // }
+    this.input.value = this.value.toFixed(this.decimals);
+    this.updateFill();
   }
 
   save(): RangeControllerState {
@@ -292,17 +416,13 @@ export class RangeController extends Controller<number> {
       if (settings.min !== undefined) {
         this.setMin(settings.min);
       } else {
-        this.setMin(
-          this.initialOptions.min !== undefined ? this.initialOptions.min : "",
-        );
+        this.setMin(this.initialOptions.min ?? 0);
       }
 
       if (settings.max !== undefined) {
         this.setMax(settings.max);
       } else {
-        this.setMax(
-          this.initialOptions.max !== undefined ? this.initialOptions.max : "",
-        );
+        this.setMax(this.initialOptions.max ?? 100);
       }
 
       if (settings.step !== undefined) {
@@ -333,12 +453,8 @@ export class RangeController extends Controller<number> {
   }
 
   private resetSettings() {
-    this.setMin(
-      this.initialOptions.min !== undefined ? this.initialOptions.min : "",
-    );
-    this.setMax(
-      this.initialOptions.max !== undefined ? this.initialOptions.max : "",
-    );
+    this.setMin(this.initialOptions.min ?? 0);
+    this.setMax(this.initialOptions.max ?? 100);
     this.setStep(this.initialOptions.step);
 
     this.signalHandler?.reset();

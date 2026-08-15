@@ -80,7 +80,6 @@ const styles = `
 .cp-root .cp-value-display,
 .cp-root .cp-button,
 .cp-root .cp-input-number,
-.cp-root .cp-input-range,
 .cp-root .cp-select,
 .cp-root .cp-radio,
 .cp-root .cp-checkbox
@@ -94,18 +93,9 @@ const styles = `
   isolation: isolate;
 }
 
-.cp-root:not([open]) .cp-summary-root {
-  opacity: 0.5;
-}
-
-/* Collapsed, the summary is the whole panel, so it should be the whole height.
-   The bottom padding clears content that isn't rendered, and the floor only
-   exists to keep a resizable body usable. The summary brings its own padding. */
 .cp-root:not([open]) {
   padding-bottom: 0;
   min-height: 0;
-  /* Dragging the resize handle leaves an inline height behind, which would
-     stretch the collapsed bar. Only the summary counts when closed. */
   height: auto !important;
 }
 
@@ -184,7 +174,7 @@ const styles = `
 }
 
 .cp-summary:focus-visible {
-  outline: 1px solid var(--color-text);
+  outline: 1px solid var(--color-subtext1);
   outline-offset: -1px;
 }
 
@@ -204,16 +194,17 @@ const styles = `
   cursor: grab;
 }
 
-/* The root's marker states whether it is open, rather than naming the widget —
-   a static icon gave no clue the panel collapsed at all. Folders below use the
-   open/closed folder glyphs, which already carry that. */
-.cp-summary-root::before {
+.cp-summary-root::after {
   content: "[+]";
   color: var(--color-subtext0);
-  margin-right: 1.5ch;
+  margin-left: 1.5ch;
+}
+.cp-summary-root::before {
+  content: "";
+  margin-right: 0ch;
 }
 
-.cp-root[open] > .cp-summary-root::before {
+.cp-root[open] > .cp-summary-root::after {
   content: "[-]";
 }
 
@@ -281,7 +272,7 @@ const styles = `
 .cp-input-number:focus {
   outline: none;
   background: transparent;
-  border-color: var(--color-text);
+  border-color: var(--color-subtext1);
 }
 
 .cp-select {
@@ -305,7 +296,7 @@ const styles = `
 
 .cp-select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 1px var(--color-text);
+  box-shadow: 0 0 0 1px var(--color-subtext1);
 }
 
 .cp-checkbox {
@@ -330,13 +321,16 @@ const styles = `
 }
 
 .cp-checkbox:checked {
-  background: transparent;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='var(--cp-swatch-size)' height='var(--cp-swatch-size)' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='2' fill='%23fff'/%3E%3C/svg%3E");
+  background: radial-gradient(
+    circle at center,
+    var(--color-subtext1) 0 calc(var(--cp-swatch-size) / 4),
+    transparent calc(var(--cp-swatch-size) / 4)
+  );
 }
 
 .cp-checkbox:focus-visible {
   outline: none;
-  border-color: var(--color-text);
+  border-color: var(--color-subtext1);
 }
 
 .cp-button {
@@ -366,7 +360,7 @@ const styles = `
 
 .cp-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 1px var(--color-text);
+  box-shadow: 0 0 0 1px var(--color-subtext1);
 }
 
 .cp-controller[data-disabled="true"] {
@@ -383,22 +377,22 @@ const styles = `
 }
 
 .cp-controller-summary:focus-visible {
-  outline: 1px solid var(--color-text);
+  outline: 1px solid var(--color-subtext1);
   outline-offset: -1px;
 }
 
-.cp-controller-summary::before {
-  content: "\\F0415";
+.cp-controller-summary::after {
+  content: "[+]";
   color: var(--color-subtext0);
-  margin-right: 1ch;
+  margin-left: 1ch;
 }
 
-.cp-root details[open] > .cp-controller-summary::before {
-  content: "\\F0374";
+.cp-root details[open] > .cp-controller-summary::after {
+  content: "[-]";
 }
 
 .cp-controller-summary-content {
-  width: calc(100% - 2ch);
+  width: calc(100% - 4ch);
   min-height: var(--cp-controller-min-height);
   vertical-align: middle;
   display: inline-flex;
@@ -406,46 +400,23 @@ const styles = `
   gap: var(--cp-space-2);
 }
 
-.cp-input-range {
+.cp-input-scrub {
   flex: 1;
-  margin: 0;
-  vertical-align: middle;
   min-width: 0;
-  height: calc(2px * var(--cp-scale));
-  -webkit-appearance: none;
-  background: var(--color-surface0);
-  cursor: grab;
-}
-.cp-input-range::-webkit-slider-thumb {
-  width: calc(4px * var(--cp-scale));
-  height: calc(8px * var(--cp-scale));
-  -webkit-appearance: none;
-  background: var(--color-text);
-  border-radius: var(--cp-border-radius);
-  cursor: grab;
-}
-.cp-input-range::-moz-range-thumb {
-  width: calc(4px * var(--cp-scale));
-  height: calc(8px * var(--cp-scale));
-  background: var(--color-text);
-  border: none;
-  border-radius: var(--cp-border-radius);
-  appearance: none;
-  cursor: grab;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  cursor: ew-resize;
+  touch-action: none;
+  background: linear-gradient(
+    to right,
+    var(--color-surface1) 0 var(--cp-fill, 0%),
+    transparent var(--cp-fill, 0%)
+  );
 }
 
-.cp-input-range:active {
-  cursor: grabbing;
-}
-
-.cp-input-range:focus-visible {
-  outline: none;
-}
-.cp-input-range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--color-text);
-}
-.cp-input-range:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--color-text);
+.cp-input-scrub:focus {
+  background: transparent;
+  cursor: text;
 }
 
 .cp-value-display {
@@ -460,6 +431,7 @@ const styles = `
   display: flex;
   flex-direction: column;
   gap: var(--cp-space-2);
+  margin-top: var(--cp-space-2);
   background: transparent;
 }
 
@@ -515,7 +487,7 @@ const styles = `
 
 .cp-radio[data-active="true"] {
   background: var(--color-surface2);
-  border-color: var(--color-text);
+  border-color: var(--color-subtext1);
   font-weight: var(--cp-font-weight-bold);
 }
 
@@ -555,7 +527,7 @@ const styles = `
 
 .cp-input-color:focus-visible {
   outline: none;
-  border-color: var(--color-text);
+  border-color: var(--color-subtext1);
 }
 
 .cp-color-swatch {
