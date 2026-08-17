@@ -191,7 +191,7 @@ const styles = `
 .cp-summary-root {
   position: sticky;
   top: 0;
-  cursor: grab;
+  cursor: pointer;
 }
 
 .cp-summary-root::after {
