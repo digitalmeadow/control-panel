@@ -1,0 +1,28 @@
+Rebuild the subset woff2:
+1. pip install fonttools brotli
+2. npm run font:subset
+
+IosevkaTermNerdFont-Regular.ttf is committed here (~13MB, SIL OFL 1.1) so the
+subset is reproducible and pinned to one version - Iosevka 33.2.1 / Nerd Fonts
+3.4.0. Replacing it is how you take a font upgrade.
+
+Nothing in this folder ships. Only the built woff2 is written into src/fonts/,
+and vite inlines that into dist/index.js as a data URI at build time.
+
+Do NOT run pyftsubset directly. It drops codepoints the source lacks silently,
+which is how the multiply sign went missing once already. build-font.py reads
+the output back and fails if anything listed below is absent.
+
+To add a glyph: paste the character below and re-run step 3.
+
+Printable ASCII (the space at the end of this line is deliberate - the font
+needs its glyph):
+!"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ 
+
+Multiply sign - the delete button in utils/dom.ts:
+×
+
+Nerd Font disclosure icons - collapsed and expanded folder, set via content:
+in styles.ts. No ordinary font carries these:
+
+

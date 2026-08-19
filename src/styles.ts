@@ -1,3 +1,4 @@
+// subset built by fonts-src/build-font.py; add glyphs via fonts-src/glyphs.txt
 const fontRegular = new URL(
   "./fonts/IosevkaTermNF-Regular.woff2",
   import.meta.url,
@@ -92,10 +93,9 @@ const styles = `
   background: transparent;
 
   font-family:
-    var(--cp-font-family),
+    var(--cp-font-family, "IosevkaTermNF"),
     "IosevkaTermNF",
-    monospace,
-    sans-serif;
+    monospace;
   font-size: var(--cp-font-size-main);
   line-height: 1.1;
 }
