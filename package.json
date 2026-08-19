@@ -1,6 +1,6 @@
 {
   "name": "@digitalmeadow/control-panel",
-  "version": "1.0.24",
+  "version": "2.0.0",
   "type": "module",
   "description": "A minimalist, framework-agnostic control panel GUI",
   "author": "Digital Meadow <inbox@digitalmeadow.studio> (https://digitalmeadow.studio)",
@@ -16,20 +16,21 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/index.cjs",
+  "sideEffects": false,
+  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc && cp -r src/fonts dist/fonts",
-    "preview": "vite preview"
+    "build": "vite build && tsc",
+    "preview": "vite preview",
+    "publish": "npm run build && npm publish"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
@@ -40,4 +41,3 @@
     "access": "public"
   }
 }
-
