@@ -10,6 +10,7 @@ export interface ControllerOptions {
   label?: string;
   disabled?: boolean;
   id?: string;
+  showSignals?: boolean;
 }
 
 export abstract class Controller<T> {

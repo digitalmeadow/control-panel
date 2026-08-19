@@ -44,6 +44,8 @@ export interface ControlPanelOptions {
   title?: string;
   presetsPrefix?: string;
   theme?: string;
+  showSignals?: boolean;
+  showPresets?: boolean;
   rootOpen?: boolean;
   expandDirection?: "down" | "up";
   foldersCollapsed?: boolean;
@@ -65,6 +67,7 @@ export abstract class ControlPanelContainer {
   abstract contentElement: HTMLElement;
   controllers: Controller<any>[] = [];
   folders: Folder[] = [];
+  protected showSignals = false;
 
   addNumber(
     object: any,
@@ -82,7 +85,10 @@ export abstract class ControlPanelContainer {
     property: string,
     options: RangeControllerOptions = {},
   ) {
-    const controller = new RangeController(object, property, options);
+    const controller = new RangeController(object, property, {
+      showSignals: this.showSignals,
+      ...options,
+    });
     this.contentElement.appendChild(controller.domElement);
     this.controllers.push(controller);
     return controller;
@@ -148,7 +154,10 @@ export abstract class ControlPanelContainer {
     property: string,
     options: GradientControllerOptions = {},
   ) {
-    const controller = new GradientController(object, property, options);
+    const controller = new GradientController(object, property, {
+      showSignals: this.showSignals,
+      ...options,
+    });
     this.contentElement.appendChild(controller.domElement);
     this.controllers.push(controller);
     return controller;
@@ -166,7 +175,7 @@ export abstract class ControlPanelContainer {
   }
 
   addFolder(title: string): Folder {
-    const folder = new Folder(title);
+    const folder = new Folder(title, true, this.showSignals);
     this.addSeparator();
     this.contentElement.appendChild(folder.domElement);
     this.folders.push(folder);
@@ -255,9 +264,10 @@ export class Folder extends ControlPanelContainer {
   summaryElement: HTMLElement;
   title: string;
 
-  constructor(title: string, open: boolean = true) {
+  constructor(title: string, open: boolean = true, showSignals = false) {
     super();
     this.title = title;
+    this.showSignals = showSignals;
 
     this.domElement = createElement("details", {
       className: "cp-folder",
@@ -278,7 +288,6 @@ export class Folder extends ControlPanelContainer {
     });
     this.domElement.appendChild(this.contentElement);
   }
-
 }
 
 export class ControlPanel extends ControlPanelContainer {
@@ -302,6 +311,7 @@ export class ControlPanel extends ControlPanelContainer {
 
     this.foldersCollapsed = options.foldersCollapsed ?? false;
     this.foldersExpanded = options.foldersExpanded ?? [];
+    this.showSignals = options.showSignals ?? false;
 
     injectStyles();
 
@@ -343,7 +353,11 @@ export class ControlPanel extends ControlPanelContainer {
       dragStartY = e.clientY;
 
       const panelRect = this.domElement.getBoundingClientRect();
-      const parentRect = this.domElement.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+      const parentRect =
+        this.domElement.offsetParent?.getBoundingClientRect() ?? {
+          left: 0,
+          top: 0,
+        };
       panelStartX = panelRect.left - parentRect.left;
       panelStartY = panelRect.top - parentRect.top;
 
@@ -418,47 +432,49 @@ export class ControlPanel extends ControlPanelContainer {
 
     // Permanent folders
     // Signals
-    const signalsFolder = this.addFolder("_Signals");
-    const singals = {
-      audioInput: null,
-      fftSize: 2048,
-    };
+    if (this.showSignals) {
+      const signalsFolder = this.addFolder("_Signals");
+      const singals = {
+        audioInput: null,
+        fftSize: 2048,
+      };
 
-    signalsFolder
-      .addRadio(singals, "audioInput", {
-        label: "Audio Signal",
-        options: ["microphone", "browser"],
-      })
-      .onChange((value) => {
-        audioSignals.setInput(value as any);
+      signalsFolder
+        .addRadio(singals, "audioInput", {
+          label: "Audio Signal",
+          options: ["microphone", "browser"],
+        })
+        .onChange((value) => {
+          audioSignals.setInput(value as any);
+        });
+
+      signalsFolder
+        .addSelect(singals, "fftSize", {
+          label: "FFT Size",
+          options: [256, 512, 1024, 2048],
+        })
+        .onChange((value) => {
+          audioSignals.setFFTSize(value as any);
+        });
+
+      signalsFolder
+        .addRange(audioSignals, "smoothingTimeConstant", {
+          min: 0,
+          max: 0.99,
+          step: 0.01,
+          label: "Smoothing",
+        })
+        .onChange((value) => {
+          audioSignals.setSmoothing(value);
+        });
+
+      signalsFolder.addRange(audioSignals, "spectrumBoost", {
+        min: 1.0,
+        max: 5.0,
+        step: 0.1,
+        label: "Compression",
       });
-
-    signalsFolder
-      .addSelect(singals, "fftSize", {
-        label: "FFT Size",
-        options: [256, 512, 1024, 2048],
-      })
-      .onChange((value) => {
-        audioSignals.setFFTSize(value as any);
-      });
-
-    signalsFolder
-      .addRange(audioSignals, "smoothingTimeConstant", {
-        min: 0,
-        max: 0.99,
-        step: 0.01,
-        label: "Smoothing",
-      })
-      .onChange((value) => {
-        audioSignals.analyser.smoothingTimeConstant = value;
-      });
-
-    signalsFolder.addRange(audioSignals, "spectrumBoost", {
-      min: 1.0,
-      max: 5.0,
-      step: 0.1,
-      label: "Compression",
-    });
+    }
 
     if (container) {
       container.appendChild(this.domElement);
@@ -470,219 +486,231 @@ export class ControlPanel extends ControlPanelContainer {
     const presetsTitle = options.title || "ControlPanel";
     this.presetStoragePrefix = `cp-presets-${presetsTitle}-`;
 
-    // Presets Folder
-    const presetsFolder = this.addFolder("_User Presets");
+    // built-in presets UI is opt-in; persistence methods work regardless
+    if (options.showPresets ?? false) {
+      // Presets Folder
+      const presetsFolder = this.addFolder("_User Presets");
 
-    // Scan localStorage for presets matching the prefix
-    const scanPresets = (): string[] => {
-      const found: string[] = ["Default"];
-      if (typeof localStorage === "undefined") return found;
+      // Scan localStorage for presets matching the prefix
+      const scanPresets = (): string[] => {
+        const found: string[] = ["Default"];
+        if (typeof localStorage === "undefined") return found;
 
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith(this.presetStoragePrefix)) {
-          const name = key.substring(this.presetStoragePrefix.length);
-          if (name !== "Default" && !found.includes(name)) {
-            found.push(name);
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(this.presetStoragePrefix)) {
+            const name = key.substring(this.presetStoragePrefix.length);
+            if (name !== "Default" && !found.includes(name)) {
+              found.push(name);
+            }
           }
         }
-      }
-      return found.sort();
-    };
+        return found.sort();
+      };
 
-    const presetsState = {
-      selected: "Default",
-      save: () => {
-        const name = prompt("Preset Name:", presetsState.selected);
-        if (name) {
-          if (name === "Default") {
-            alert("Cannot overwrite Default preset");
+      const presetsState = {
+        selected: "Default",
+        save: () => {
+          const name = prompt("Preset Name:", presetsState.selected);
+          if (name) {
+            if (name === "Default") {
+              alert("Cannot overwrite Default preset");
+              return;
+            }
+            // Save using consistent prefix
+            const key = this.presetStoragePrefix + name;
+            this.saveToLocalStorage(key);
+
+            // Refresh list
+            const list = scanPresets();
+            presetSelect.setOptions(list);
+
+            // Select new
+            presetsState.selected = name;
+            presetSelect.setValue(name);
+          }
+        },
+        load: () => {
+          const selectedPreset = presetsState.selected;
+          const key = this.presetStoragePrefix + selectedPreset;
+          this.loadFromLocalStorage(key);
+
+          // Restore selection after load (prevents it from resetting to Default)
+          presetsState.selected = selectedPreset;
+          presetSelect.setValue(selectedPreset);
+        },
+        delete: () => {
+          if (presetsState.selected === "Default") {
+            alert("Cannot delete Default preset");
             return;
           }
-          // Save using consistent prefix
-          const key = this.presetStoragePrefix + name;
-          this.saveToLocalStorage(key);
+          if (confirm(`Delete preset "${presetsState.selected}"?`)) {
+            const key = this.presetStoragePrefix + presetsState.selected;
+            localStorage.removeItem(key);
 
-          // Refresh list
-          const list = scanPresets();
-          presetSelect.setOptions(list);
+            // Refresh list
+            const list = scanPresets();
+            presetSelect.setOptions(list);
 
-          // Select new
-          presetsState.selected = name;
-          presetSelect.setValue(name);
-        }
-      },
-      load: () => {
-        const selectedPreset = presetsState.selected;
-        const key = this.presetStoragePrefix + selectedPreset;
-        this.loadFromLocalStorage(key);
+            // Reset selection
+            presetsState.selected = "Default";
+            presetSelect.setValue("Default");
+            this.reset();
+          }
+        },
+        export: () => {
+          const state = this.save();
 
-        // Restore selection after load (prevents it from resetting to Default)
-        presetsState.selected = selectedPreset;
-        presetSelect.setValue(selectedPreset);
-      },
-      delete: () => {
-        if (presetsState.selected === "Default") {
-          alert("Cannot delete Default preset");
-          return;
-        }
-        if (confirm(`Delete preset "${presetsState.selected}"?`)) {
-          const key = this.presetStoragePrefix + presetsState.selected;
-          localStorage.removeItem(key);
+          // Filter out internal folders/controllers (prefixed with _)
+          const filterUIState = (
+            section: ControlPanelSectionState,
+          ): ControlPanelSectionState => {
+            const filtered: ControlPanelSectionState = {
+              controllers: {},
+              folders: {},
+            };
 
-          // Refresh list
-          const list = scanPresets();
-          presetSelect.setOptions(list);
+            // Copy controllers that don't start with underscore
+            for (const [key, value] of Object.entries(section.controllers)) {
+              if (!key.startsWith("_")) {
+                filtered.controllers[key] = value;
+              }
+            }
 
-          // Reset selection
-          presetsState.selected = "Default";
-          presetSelect.setValue("Default");
-          this.reset();
-        }
-      },
-      export: () => {
-        const state = this.save();
+            // Recursively filter folders that don't start with underscore
+            for (const [folderName, folderState] of Object.entries(
+              section.folders,
+            )) {
+              if (!folderName.startsWith("_")) {
+                filtered.folders[folderName] = filterUIState(folderState);
+              }
+            }
 
-        // Filter out internal folders/controllers (prefixed with _)
-        const filterUIState = (
-          section: ControlPanelSectionState,
-        ): ControlPanelSectionState => {
-          const filtered: ControlPanelSectionState = {
-            controllers: {},
-            folders: {},
+            return filtered;
           };
 
-          // Copy controllers that don't start with underscore
-          for (const [key, value] of Object.entries(section.controllers)) {
-            if (!key.startsWith("_")) {
-              filtered.controllers[key] = value;
-            }
-          }
+          const cleanedState = filterUIState(state);
 
-          // Recursively filter folders that don't start with underscore
-          for (const [folderName, folderState] of Object.entries(
-            section.folders,
-          )) {
-            if (!folderName.startsWith("_")) {
-              filtered.folders[folderName] = filterUIState(folderState);
-            }
-          }
+          // Create export object with helpful metadata
+          const exportData = {
+            _presetName: presetsState.selected || "CustomPreset",
+            _exportDate: new Date().toISOString(),
+            _instructions:
+              "To add as factory preset: Copy 'controllers' and 'folders' fields into the presets.json file",
+            ...cleanedState,
+          };
 
-          return filtered;
-        };
+          // Format as readable JSON
+          const json = JSON.stringify(exportData, null, 2);
 
-        const cleanedState = filterUIState(state);
+          // Create downloadable file
+          const blob = new Blob([json], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
 
-        // Create export object with helpful metadata
-        const exportData = {
-          _presetName: presetsState.selected || "CustomPreset",
-          _exportDate: new Date().toISOString(),
-          _instructions:
-            "To add as factory preset: Copy 'controllers' and 'folders' fields into the presets.json file",
-          ...cleanedState,
-        };
+          // Filename: {controlPanelTitle}-preset-{presetName}-{timestamp}.json
+          const timestamp = new Date().toISOString().split("T")[0];
+          const sanitizedName = presetsState.selected
+            .replace(/[^a-z0-9]/gi, "-")
+            .toLowerCase();
+          a.download = `${presetsTitle.toLowerCase()}-preset-${sanitizedName}-${timestamp}.json`;
 
-        // Format as readable JSON
-        const json = JSON.stringify(exportData, null, 2);
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        },
+        import: () => {
+          // Create hidden file input
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = ".json";
 
-        // Create downloadable file
-        const blob = new Blob([json], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
+          input.onchange = (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
 
-        // Filename: {controlPanelTitle}-preset-{presetName}-{timestamp}.json
-        const timestamp = new Date().toISOString().split("T")[0];
-        const sanitizedName = presetsState.selected
-          .replace(/[^a-z0-9]/gi, "-")
-          .toLowerCase();
-        a.download = `${presetsTitle.toLowerCase()}-preset-${sanitizedName}-${timestamp}.json`;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              try {
+                const json = event.target?.result as string;
+                const data = JSON.parse(json);
 
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      },
-      import: () => {
-        // Create hidden file input
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".json";
+                // Extract state (skip metadata fields starting with _)
+                const state: ControlPanelSectionState = {
+                  controllers: data.controllers || {},
+                  folders: data.folders || {},
+                };
 
-        input.onchange = (e) => {
-          const file = (e.target as HTMLInputElement).files?.[0];
-          if (!file) return;
+                // Validate structure
+                if (!state.controllers || !state.folders) {
+                  alert(
+                    "Invalid preset file: missing 'controllers' or 'folders'",
+                  );
+                  return;
+                }
 
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            try {
-              const json = event.target?.result as string;
-              const data = JSON.parse(json);
+                // Apply the preset
+                this.load(state);
 
-              // Extract state (skip metadata fields starting with _)
-              const state: ControlPanelSectionState = {
-                controllers: data.controllers || {},
-                folders: data.folders || {},
-              };
-
-              // Validate structure
-              if (!state.controllers || !state.folders) {
-                alert(
-                  "Invalid preset file: missing 'controllers' or 'folders'",
+                // Optionally save to localStorage
+                const name = data._presetName || "ImportedPreset";
+                const shouldSave = confirm(
+                  `Preset loaded! Save as "${name}" to User Presets?`,
                 );
-                return;
+                if (shouldSave) {
+                  const key = this.presetStoragePrefix + name;
+                  this.saveToLocalStorage(key);
+
+                  // Refresh list
+                  const list = scanPresets();
+                  presetSelect.setOptions(list);
+                  presetsState.selected = name;
+                  presetSelect.setValue(name);
+                }
+              } catch (error) {
+                alert(
+                  `Failed to import preset: ${error instanceof Error ? error.message : "Invalid JSON"}`,
+                );
+                console.error("Import error:", error);
               }
+            };
 
-              // Apply the preset
-              this.load(state);
-
-              // Optionally save to localStorage
-              const name = data._presetName || "ImportedPreset";
-              const shouldSave = confirm(
-                `Preset loaded! Save as "${name}" to User Presets?`,
-              );
-              if (shouldSave) {
-                const key = this.presetStoragePrefix + name;
-                this.saveToLocalStorage(key);
-
-                // Refresh list
-                const list = scanPresets();
-                presetSelect.setOptions(list);
-                presetsState.selected = name;
-                presetSelect.setValue(name);
-              }
-            } catch (error) {
-              alert(
-                `Failed to import preset: ${error instanceof Error ? error.message : "Invalid JSON"}`,
-              );
-              console.error("Import error:", error);
-            }
+            reader.readAsText(file);
           };
 
-          reader.readAsText(file);
-        };
+          input.click();
+        },
+      };
 
-        input.click();
-      },
-    };
+      const initialPresets = scanPresets();
+      const presetSelect = presetsFolder.addSelect(presetsState, "selected", {
+        label: "Preset",
+        options: initialPresets,
+      });
 
-    const initialPresets = scanPresets();
-    const presetSelect = presetsFolder.addSelect(presetsState, "selected", {
-      label: "Preset",
-      options: initialPresets,
-    });
+      presetsFolder.addButton("Load", () => presetsState.load());
+      presetsFolder.addButton("Save", () => presetsState.save());
+      presetsFolder.addButton("Delete", () => presetsState.delete());
+      presetsFolder.addButton("Export", () => presetsState.export());
+      presetsFolder.addButton("Import", () => presetsState.import());
+    }
 
-    presetsFolder.addButton("Load", () => presetsState.load());
-    presetsFolder.addButton("Save", () => presetsState.save());
-    presetsFolder.addButton("Delete", () => presetsState.delete());
-    presetsFolder.addButton("Export", () => presetsState.export());
-    presetsFolder.addButton("Import", () => presetsState.import());
-
-    if (options.expandDirection === "up") this.domElement.classList.add("cp-root--expand-up");
+    if (options.expandDirection === "up")
+      this.domElement.classList.add("cp-root--expand-up");
   }
 
   addFolder(title: string): Folder {
-    const folder = new Folder(title, this.foldersExpanded.includes(title) ? true : this.foldersCollapsed ? false : true);
+    const folder = new Folder(
+      title,
+      this.foldersExpanded.includes(title)
+        ? true
+        : this.foldersCollapsed
+          ? false
+          : true,
+      this.showSignals,
+    );
     this.addSeparator();
     this.contentElement.appendChild(folder.domElement);
     this.folders.push(folder);

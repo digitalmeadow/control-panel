@@ -19,7 +19,7 @@ export interface GradientControllerOptions extends ControllerOptions {
 interface GradientControllerState {
   stops: ColorStop[];
   settings: {
-    signal: SignalHandlerState;
+    signal: SignalHandlerState | null;
   };
 }
 
@@ -103,15 +103,17 @@ export class GradientController extends Controller<string> {
     });
     settings.appendChild(addBtn);
 
-    const separator = createElement("hr", { className: "cp-separator" });
-    settings.appendChild(separator);
-
     // Signal Handler
-    this.signalHandler = new SignalHandler({
-      container: settings,
-      onChange: (easedValue, behaviour) =>
-        this.applySignal(easedValue, behaviour),
-    });
+    if (options.showSignals) {
+      const separator = createElement("hr", { className: "cp-separator" });
+      settings.appendChild(separator);
+
+      this.signalHandler = new SignalHandler({
+        container: settings,
+        onChange: (easedValue, behaviour) =>
+          this.applySignal(easedValue, behaviour),
+      });
+    }
 
     details.appendChild(settings);
     this.appendWidget(details);
@@ -256,7 +258,7 @@ export class GradientController extends Controller<string> {
     return {
       stops: this.stops,
       settings: {
-        signal: this.signalHandler!.save(),
+        signal: this.signalHandler?.save() ?? null,
       },
     };
   }

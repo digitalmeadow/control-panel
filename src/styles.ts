@@ -14,6 +14,32 @@ const styles = `
   font-display: swap;
 }
 
+.cp-root,
+.cp-root *,
+.cp-root *::before,
+.cp-root *::after {
+  box-sizing: border-box;
+}
+
+.cp-root summary {
+  list-style: none;
+}
+
+.cp-root summary::-webkit-details-marker {
+  display: none;
+}
+
+.cp-root {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cp-root input,
+.cp-root textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 .cp-root {
   --cp-scale: 1;
   
@@ -46,6 +72,8 @@ const styles = `
   --color-text: #f8f9e8;
   --color-subtext1: #adc9bc;
   --color-subtext0: #96b4aa;
+
+  --cp-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%2396b4aa' d='M1 2h6l-3 4z'/%3E%3C/svg%3E");
 
   --cp-mix-blend-mode: normal;
   
@@ -134,7 +162,6 @@ const styles = `
   background: var(--color-subtext0);
 }
 
-/* Themes */
 .cp-root.cp-theme--dark {
   --color-base: #232a2e;
   --cp-mix-blend-mode: normal;
@@ -148,6 +175,7 @@ const styles = `
   --color-text: #2b3034;
   --color-subtext1: #455355;
   --color-subtext0: #576869;
+  --cp-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23576869' d='M1 2h6l-3 4z'/%3E%3C/svg%3E");
   --cp-mix-blend-mode: normal;
   background-color: var(--color-base);
 }
@@ -170,7 +198,6 @@ const styles = `
   font-weight: var(--cp-font-weight-bold);
   outline: none;
   cursor: pointer;
-  user-select: none;
 }
 
 .cp-summary:focus-visible {
@@ -243,7 +270,6 @@ const styles = `
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  user-select: none;
 }
 
 .cp-input-number {
@@ -288,7 +314,7 @@ const styles = `
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23fff' d='M1 2h6l-3 4z'/%3E%3C/svg%3E");
+  background-image: var(--cp-select-arrow);
   background-repeat: no-repeat;
   background-position: right var(--cp-icon-position) center;
   background-size: var(--cp-icon-size) var(--cp-icon-size);
@@ -424,7 +450,6 @@ const styles = `
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-size: var(--cp-font-size-details);
-  user-select: none;
 }
 
 .cp-number-settings {
@@ -437,6 +462,7 @@ const styles = `
 
 .cp-separator {
   width: 100%;
+  margin: 0;
   border: none;
   border-top: var(--cp-border-width) solid var(--color-surface0);
 }

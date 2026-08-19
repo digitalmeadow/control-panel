@@ -305,7 +305,11 @@ export class SignalHandler {
 
       if (isAudio) {
         this.currentMidiId = null;
-        if (Controller.audio.ctx.state === "suspended") {
+        // null ctx means audio was never started; setInput initialises it
+        if (
+          !Controller.audio.ctx ||
+          Controller.audio.ctx.state === "suspended"
+        ) {
           Controller.audio.setInput("microphone");
         }
       } else if (!isMidi) {

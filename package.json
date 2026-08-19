@@ -1,6 +1,6 @@
 {
   "name": "@digitalmeadow/control-panel",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "module",
   "description": "A minimalist, framework-agnostic control panel GUI",
   "author": "Digital Meadow <inbox@digitalmeadow.studio> (https://digitalmeadow.studio)",
@@ -30,7 +30,8 @@
     "dev": "vite",
     "build": "vite build && tsc",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "font:subset": "pyftsubset src/fonts/IosevkaTermNF-Regular.full.woff2 --output-file=src/fonts/IosevkaTermNF-Regular.woff2 --unicodes=U+0020-007E,U+E5FE,U+E5FF --flavor=woff2 --layout-features= --no-hinting --desubroutinize"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

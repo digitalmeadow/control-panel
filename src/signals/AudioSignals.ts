@@ -3,16 +3,16 @@ import { clamp, map_range } from "../utils/math";
 export type AudioInputType = "microphone" | "browser";
 
 export class AudioSignals {
-  ctx: AudioContext;
-  analyser: AnalyserNode;
+  ctx: AudioContext | null = null;
+  analyser: AnalyserNode | null = null;
   source: MediaStreamAudioSourceNode | null = null;
   stream: MediaStream | null = null;
 
   fftSize = 2048;
-  dataArray: Uint8Array<ArrayBuffer>;
-  waveformArray: Uint8Array<ArrayBuffer>;
 
-  // Spectrum normalization parameters
+  dataArray: Uint8Array<ArrayBuffer> = new Uint8Array(1024);
+  waveformArray: Uint8Array<ArrayBuffer> = new Uint8Array(1024);
+
   smoothingTimeConstant = 0.82;
   spectrumBoost = 3.0; // Frequency-dependent boost (1.0 = off, higher = more balanced)
 
@@ -33,26 +33,45 @@ export class AudioSignals {
 
   private _isAnalyzing = false;
 
-  constructor() {
+  private initialized = false;
+
+  // deferred so importing the package never constructs an AudioContext
+  ensureInit() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     const AudioContextClass =
       window.AudioContext || (window as any).webkitAudioContext;
-    this.ctx = new AudioContextClass();
-    this.analyser = this.ctx.createAnalyser();
-    this.analyser.fftSize = this.fftSize;
-    this.analyser.smoothingTimeConstant = this.smoothingTimeConstant;
-    this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-    this.waveformArray = new Uint8Array(this.analyser.frequencyBinCount);
+    const ctx = new AudioContextClass();
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = this.fftSize;
+    analyser.smoothingTimeConstant = this.smoothingTimeConstant;
+
+    this.ctx = ctx;
+    this.analyser = analyser;
+    this.dataArray = new Uint8Array(analyser.frequencyBinCount);
+    this.waveformArray = new Uint8Array(analyser.frequencyBinCount);
   }
 
   setFFTSize(size: 256 | 512 | 1024 | 2048) {
     this.fftSize = size;
+    if (!this.analyser) return; // applied on init
     this.analyser.fftSize = size;
     // Recreate arrays with new size
     this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
     this.waveformArray = new Uint8Array(this.analyser.frequencyBinCount);
   }
 
+  setSmoothing(value: number) {
+    this.smoothingTimeConstant = value;
+    if (this.analyser) this.analyser.smoothingTimeConstant = value;
+  }
+
   async setInput(type: AudioInputType) {
+    this.ensureInit();
+    const ctx = this.ctx!;
+    const analyser = this.analyser!;
+
     try {
       let streamPromise: Promise<MediaStream>;
 
@@ -71,8 +90,8 @@ export class AudioSignals {
 
       const newStream = await streamPromise;
 
-      if (this.ctx.state === "suspended") {
-        this.ctx.resume();
+      if (ctx.state === "suspended") {
+        ctx.resume();
       }
 
       // Cleanup old stream
@@ -84,8 +103,8 @@ export class AudioSignals {
       }
 
       this.stream = newStream;
-      this.source = this.ctx.createMediaStreamSource(this.stream);
-      this.source.connect(this.analyser);
+      this.source = ctx.createMediaStreamSource(this.stream);
+      this.source.connect(analyser);
       this._isAnalyzing = true;
       this.loop();
     } catch (err) {
@@ -101,6 +120,7 @@ export class AudioSignals {
   };
 
   update() {
+    if (!this.analyser) return;
     this.analyser.getByteFrequencyData(this.dataArray);
     this.analyser.getByteTimeDomainData(this.waveformArray);
 

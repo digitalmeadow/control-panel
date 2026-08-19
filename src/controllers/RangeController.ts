@@ -18,7 +18,7 @@ interface RangeControllerState {
     min: number;
     max: number;
     step: string;
-    signal: SignalHandlerState;
+    signal: SignalHandlerState | null;
   };
 }
 
@@ -111,15 +111,17 @@ export class RangeController extends Controller<number> {
     this.stepInput = stepRes.input;
     settings.appendChild(stepRes.row);
 
-    const separator = createElement("hr", { className: "cp-separator" });
-    settings.appendChild(separator);
-
     // Signal Handler
-    this.signalHandler = new SignalHandler({
-      container: settings,
-      onChange: (easedValue, behaviour) =>
-        this.applySignal(easedValue, behaviour),
-    });
+    if (options.showSignals) {
+      const separator = createElement("hr", { className: "cp-separator" });
+      settings.appendChild(separator);
+
+      this.signalHandler = new SignalHandler({
+        container: settings,
+        onChange: (easedValue, behaviour) =>
+          this.applySignal(easedValue, behaviour),
+      });
+    }
 
     details.appendChild(settings);
     this.appendWidget(details);
@@ -401,7 +403,7 @@ export class RangeController extends Controller<number> {
         min: this.min,
         max: this.max,
         step: this.input.step,
-        signal: this.signalHandler!.save(),
+        signal: this.signalHandler?.save() ?? null,
       },
     };
   }
