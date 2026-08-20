@@ -33,6 +33,7 @@ export class RangeController extends Controller<number> {
 
   private initialOptions: RangeControllerOptions;
   private drag: {
+    pointerId: number;
     x: number;
     value: number;
     moved: boolean;
@@ -129,24 +130,39 @@ export class RangeController extends Controller<number> {
 
   // Drag to scrub, click to type. Focused, it behaves as a plain number field.
   private bindScrub() {
-    this.input.addEventListener("pointerdown", (e) => {
+    // Focus comes from mousedown, not pointerdown. Cancelling pointerdown would interfere with the pointer capture that keeps the drag alive off-element.
+    this.input.addEventListener("mousedown", (e) => {
       if (document.activeElement === this.input) return;
       e.preventDefault(); // suppress native focus so a drag doesn't place a caret
-      this.input.setPointerCapture(e.pointerId);
+    });
+
+    this.input.addEventListener("pointerdown", (e) => {
+      if (document.activeElement === this.input) return;
+
+      // Set before capturing: a throw below must not leave the drag half-built.
       this.drag = {
+        pointerId: e.pointerId,
         x: e.clientX,
         value: this.value,
         moved: false,
         fine: e.shiftKey,
       };
+
+      try {
+        this.input.setPointerCapture(e.pointerId);
+      } catch {
+        // InvalidPointerId: the pointer went away before capture could be set
+        // (a rapid tap). The drag still ends through one of the handlers below.
+      }
     });
 
     this.input.addEventListener("pointermove", (e) => {
-      if (!this.drag) return;
+      if (!this.drag || e.pointerId !== this.drag.pointerId) return;
 
       // Re-anchor when shift is toggled so sensitivity changes don't jump.
       if (e.shiftKey !== this.drag.fine) {
         this.drag = {
+          pointerId: this.drag.pointerId,
           x: e.clientX,
           value: this.value,
           moved: true,
@@ -163,22 +179,15 @@ export class RangeController extends Controller<number> {
       this.commit(this.drag.value + dx * this.valuePerPixel() * sensitivity);
     });
 
-    this.input.addEventListener("pointerup", (e) => {
-      if (!this.drag) return;
-      const { moved } = this.drag;
-      this.drag = null;
-      this.input.releasePointerCapture(e.pointerId);
-
-      // A press that never travelled is a click: focus ready to type over.
-      if (!moved) {
-        this.input.focus();
-        this.input.select();
-      }
-    });
-
-    this.input.addEventListener("pointercancel", () => {
-      this.drag = null;
-    });
+    this.input.addEventListener("pointerup", (e) => this.endScrub(e.pointerId));
+    this.input.addEventListener("pointercancel", (e) =>
+      this.endScrub(e.pointerId),
+    );
+    // Capture can end without a pointerup — losing it silently is what left the
+    // drag stuck, still scrubbing after the button was released off-element.
+    this.input.addEventListener("lostpointercapture", (e) =>
+      this.endScrub(e.pointerId),
+    );
 
     this.input.addEventListener("focus", () => {
       this.valueBeforeEdit = this.value;
@@ -207,6 +216,26 @@ export class RangeController extends Controller<number> {
         );
       }
     });
+  }
+
+  // Single teardown for every way a scrub can end: pointerup, pointercancel, or
+  // capture being lost. Re-entrant by design — releasing capture fires
+  // lostpointercapture, which lands back here after this.drag is already null.
+  private endScrub(pointerId: number) {
+    if (!this.drag || pointerId !== this.drag.pointerId) return;
+
+    const { moved } = this.drag;
+    this.drag = null;
+
+    if (this.input.hasPointerCapture(pointerId)) {
+      this.input.releasePointerCapture(pointerId);
+    }
+
+    // A press that never travelled is a click: focus ready to type over.
+    if (!moved) {
+      this.input.focus();
+      this.input.select();
+    }
   }
 
   private commit(value: number) {

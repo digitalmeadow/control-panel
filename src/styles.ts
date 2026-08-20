@@ -403,8 +403,12 @@ const styles = `
 }
 
 .cp-controller-summary:focus-visible {
+  outline: none;
+}
+
+.cp-controller-summary:focus-visible::after {
   outline: 1px solid var(--color-subtext1);
-  outline-offset: -1px;
+  outline-offset: 1px;
 }
 
 .cp-controller-summary::after {
