@@ -298,6 +298,8 @@ export class ControlPanel extends ControlPanelContainer {
   private presetStoragePrefix: string;
   private foldersCollapsed: boolean;
   private foldersExpanded: string[];
+  private position?: ControlPanelOptions["position"];
+  private onWindowResize = () => this.applyPosition();
 
   constructor(
     container?: HTMLElement,
@@ -389,43 +391,12 @@ export class ControlPanel extends ControlPanelContainer {
     });
 
     document.addEventListener("mouseup", () => {
-      if (isDragging) {
-        isDragging = false;
-        this.savePositionAndSize();
-      }
+      isDragging = false;
     });
 
-    // Resize observer
-    const resizeObserver = new ResizeObserver(() => {
-      if (!isDragging) {
-        this.savePositionAndSize();
-      }
-    });
-    resizeObserver.observe(this.domElement);
-
-    // Apply default positioning — restored state or explicit options override
-    const pos = options.position;
-    if (pos) {
-      if (pos.top !== undefined)
-        this.domElement.style.top =
-          typeof pos.top === "number" ? `${pos.top}px` : pos.top;
-      if (pos.right !== undefined)
-        this.domElement.style.right =
-          typeof pos.right === "number" ? `${pos.right}px` : pos.right;
-      if (pos.bottom !== undefined)
-        this.domElement.style.bottom =
-          typeof pos.bottom === "number" ? `${pos.bottom}px` : pos.bottom;
-      if (pos.left !== undefined)
-        this.domElement.style.left =
-          typeof pos.left === "number" ? `${pos.left}px` : pos.left;
-    } else {
-      // Legacy default: top-right
-      this.domElement.style.top = "0";
-      this.domElement.style.right = "0";
-    }
-
-    // Restore position and size from sessionStorage
-    this.restorePositionAndSize();
+    this.position = options.position;
+    this.applyPosition();
+    window.addEventListener("resize", this.onWindowResize);
 
     this.contentElement = createElement("div", { className: "cp-content" });
     this.domElement.appendChild(this.contentElement);
@@ -746,42 +717,32 @@ export class ControlPanel extends ControlPanelContainer {
     this.saveToLocalStorage(defaultKey);
   }
 
-  // Height is deliberately not persisted. The panel has to be free to grow as
-  // folders open, and an explicit height pins it — you get an inner scrollbar
-  // instead. Left to itself it sizes to its content and stops at max-height.
-  private savePositionAndSize() {
-    const rect = this.domElement.getBoundingClientRect();
-    const key = `cp-position-${this.presetStoragePrefix}`;
-    const state = {
-      left: rect.left,
-      top: rect.top,
-      width: this.domElement.offsetWidth,
-    };
-    try {
-      sessionStorage.setItem(key, JSON.stringify(state));
-    } catch (e) {
-      console.warn("Failed to save panel position/size", e);
-    }
-  }
+  // Also runs on window resize, which is what returns a dragged panel to a
+  // corner that still exists. Height is never set: the panel has to be free to
+  // grow as folders open, and an explicit height pins it into an inner scrollbar.
+  private applyPosition() {
+    const style = this.domElement.style;
 
-  private restorePositionAndSize() {
-    const key = `cp-position-${this.presetStoragePrefix}`;
-    try {
-      const raw = sessionStorage.getItem(key);
-      if (raw) {
-        const state = JSON.parse(raw);
-        this.domElement.style.left = `${state.left}px`;
-        this.domElement.style.top = `${state.top}px`;
-        this.domElement.style.right = "auto";
-        this.domElement.style.bottom = "auto";
-        this.domElement.style.width = `${state.width}px`;
-      }
-    } catch (e) {
-      console.warn("Failed to restore panel position/size", e);
+    // A drag leaves inline left/top behind, and those beat right/bottom.
+    style.top = style.right = style.bottom = style.left = "";
+
+    const pos = this.position;
+    if (!pos) {
+      // Legacy default: top-right
+      style.top = "0";
+      style.right = "0";
+      return;
     }
+
+    const px = (v: number | string) => (typeof v === "number" ? `${v}px` : v);
+    if (pos.top !== undefined) style.top = px(pos.top);
+    if (pos.right !== undefined) style.right = px(pos.right);
+    if (pos.bottom !== undefined) style.bottom = px(pos.bottom);
+    if (pos.left !== undefined) style.left = px(pos.left);
   }
 
   destroy() {
+    window.removeEventListener("resize", this.onWindowResize);
     this.stats.destroy();
     this.domElement.remove();
     this.controllers = [];

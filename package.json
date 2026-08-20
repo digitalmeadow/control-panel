@@ -1,6 +1,6 @@
 {
   "name": "@digitalmeadow/control-panel",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "type": "module",
   "description": "A minimalist, framework-agnostic control panel GUI",
   "author": "Digital Meadow <inbox@digitalmeadow.studio> (https://digitalmeadow.studio)",
