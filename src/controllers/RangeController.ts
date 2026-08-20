@@ -152,42 +152,17 @@ export class RangeController extends Controller<number> {
         this.input.setPointerCapture(e.pointerId);
       } catch {
         // InvalidPointerId: the pointer went away before capture could be set
-        // (a rapid tap). The drag still ends through one of the handlers below.
-      }
-    });
-
-    this.input.addEventListener("pointermove", (e) => {
-      if (!this.drag || e.pointerId !== this.drag.pointerId) return;
-
-      // Re-anchor when shift is toggled so sensitivity changes don't jump.
-      if (e.shiftKey !== this.drag.fine) {
-        this.drag = {
-          pointerId: this.drag.pointerId,
-          x: e.clientX,
-          value: this.value,
-          moved: true,
-          fine: e.shiftKey,
-        };
-        return;
+        // (a rapid tap). The window handlers still end the drag.
       }
 
-      const dx = e.clientX - this.drag.x;
-      if (!this.drag.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
-      this.drag.moved = true;
-
-      const sensitivity = e.shiftKey ? 0.1 : 1;
-      this.commit(this.drag.value + dx * this.valuePerPixel() * sensitivity);
+      // Capture alone is not enough. Mounted inside a `pointer-events: none`
+      // overlay, the pointer leaving the panel lands on a region that is not
+      // hit-testable and the element stops receiving events. Window sees them
+      // regardless, since they bubble from whatever is underneath.
+      window.addEventListener("pointermove", this.onScrubMove);
+      window.addEventListener("pointerup", this.onScrubEnd);
+      window.addEventListener("pointercancel", this.onScrubEnd);
     });
-
-    this.input.addEventListener("pointerup", (e) => this.endScrub(e.pointerId));
-    this.input.addEventListener("pointercancel", (e) =>
-      this.endScrub(e.pointerId),
-    );
-    // Capture can end without a pointerup — losing it silently is what left the
-    // drag stuck, still scrubbing after the button was released off-element.
-    this.input.addEventListener("lostpointercapture", (e) =>
-      this.endScrub(e.pointerId),
-    );
 
     this.input.addEventListener("focus", () => {
       this.valueBeforeEdit = this.value;
@@ -218,14 +193,49 @@ export class RangeController extends Controller<number> {
     });
   }
 
-  // Single teardown for every way a scrub can end: pointerup, pointercancel, or
-  // capture being lost. Re-entrant by design — releasing capture fires
-  // lostpointercapture, which lands back here after this.drag is already null.
+  // Bound once so add/removeEventListener see the same reference.
+  private onScrubMove = (e: PointerEvent) => {
+    if (!this.drag || e.pointerId !== this.drag.pointerId) return;
+
+    // Released somewhere that never delivered a pointerup — outside the browser
+    // window, say. Without this the drag would resume on the next move.
+    if (e.buttons === 0) {
+      this.endScrub(e.pointerId);
+      return;
+    }
+
+    // Re-anchor when shift is toggled so sensitivity changes don't jump.
+    if (e.shiftKey !== this.drag.fine) {
+      this.drag = {
+        pointerId: this.drag.pointerId,
+        x: e.clientX,
+        value: this.value,
+        moved: true,
+        fine: e.shiftKey,
+      };
+      return;
+    }
+
+    const dx = e.clientX - this.drag.x;
+    if (!this.drag.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
+    this.drag.moved = true;
+
+    const sensitivity = e.shiftKey ? 0.1 : 1;
+    this.commit(this.drag.value + dx * this.valuePerPixel() * sensitivity);
+  };
+
+  private onScrubEnd = (e: PointerEvent) => this.endScrub(e.pointerId);
+
+  // Single teardown for every way a scrub can end.
   private endScrub(pointerId: number) {
     if (!this.drag || pointerId !== this.drag.pointerId) return;
 
     const { moved } = this.drag;
     this.drag = null;
+
+    window.removeEventListener("pointermove", this.onScrubMove);
+    window.removeEventListener("pointerup", this.onScrubEnd);
+    window.removeEventListener("pointercancel", this.onScrubEnd);
 
     if (this.input.hasPointerCapture(pointerId)) {
       this.input.releasePointerCapture(pointerId);
@@ -397,16 +407,21 @@ export class RangeController extends Controller<number> {
     onChange: (val: string) => void,
   ) {
     const settingId = this.subId(label.toLowerCase());
+    const labelId = `${settingId}-label`;
     const row = createElement("div", { className: "cp-setting-row" });
-    const labelEl = createElement("label", { className: "cp-setting-label" }, [
-      label,
-    ]);
-    labelEl.setAttribute("for", settingId);
+    // aria-labelledby rather than `for`, so clicking the label doesn't refocus
+    // the input you just clicked away from. See Controller's own label.
+    const labelEl = createElement(
+      "label",
+      { className: "cp-setting-label", id: labelId },
+      [label],
+    );
     const input = createElement("input", {
       type: "number",
       id: settingId,
       className: "cp-input-number cp-input-small",
       step: "any",
+      "aria-labelledby": labelId,
     });
 
     if (initialValue !== undefined) {

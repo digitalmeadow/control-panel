@@ -38,11 +38,12 @@ export abstract class Controller<T> {
     this.domElement = createElement("div", { className: "cp-controller" });
 
     const labelText = options.label ?? formatStringCamelToSentence(property);
-    const label = createElement("label", { className: "cp-label" }, [
-      String(labelText),
-    ]);
+    const label = createElement(
+      "label",
+      { className: "cp-label", id: this.subId("label") },
+      [String(labelText)],
+    );
     label.setAttribute("title", String(labelText));
-    label.setAttribute("for", this.controllerId);
     this.domElement.appendChild(label);
 
     if (options.disabled) {
@@ -88,6 +89,12 @@ export abstract class Controller<T> {
   }
 
   protected appendWidget(widget: HTMLElement) {
+    const control =
+      widget.id === this.controllerId
+        ? widget
+        : widget.querySelector<HTMLElement>(`[id="${this.controllerId}"]`);
+    control?.setAttribute("aria-labelledby", this.subId("label"));
+
     this.domElement.appendChild(widget);
   }
 
